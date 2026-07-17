@@ -1,13 +1,12 @@
 package com.placer.firewatch.report
 
-import android.content.Context
 import android.net.Uri
 import android.util.Log
 import com.google.firebase.firestore.DocumentReference
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.storage.FirebaseStorage
-import com.placer.firewatch.util.Prefs
+import com.placer.firewatch.auth.AuthManager
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
 import kotlinx.coroutines.suspendCancellableCoroutine
@@ -15,13 +14,14 @@ import kotlinx.coroutines.suspendCancellableCoroutine
 /**
  * Writes one-tap fire reports to Firestore, uploading the attached photo
  * (if any) to Storage first so its download URL can be included in the
- * same document write.
+ * same document write. The submitter is identified by a Firebase Auth
+ * anonymous UID (see AuthManager) rather than any real account.
  *
  * Requires a real app/google-services.json from your own Firebase project
- * (Firestore + Storage enabled) to actually reach a backend — see the
- * README's "One-tap fire reporting (Firebase setup)" section. The repo
- * ships a placeholder file so the project still compiles and builds
- * without one.
+ * (Anonymous Auth + Firestore + Storage enabled) to actually reach a
+ * backend — see the README's "One-tap fire reporting (Firebase setup)"
+ * section. The repo ships a placeholder file so the project still
+ * compiles and builds without one.
  */
 class FireReportRepository {
 
@@ -34,8 +34,9 @@ class FireReportRepository {
     private val firestore by lazy { FirebaseFirestore.getInstance() }
     private val storage by lazy { FirebaseStorage.getInstance() }
 
-    suspend fun submit(context: Context, draft: FireReportDraft): Result<Unit> {
+    suspend fun submit(draft: FireReportDraft): Result<Unit> {
         return try {
+            val userId = AuthManager.getOrSignInUserId()
             val docRef = firestore.collection(COLLECTION).document()
             val photoUrl = draft.photoUri?.let { uploadPhoto(docRef.id, it) }
 
@@ -43,10 +44,11 @@ class FireReportRepository {
                 "latitude" to draft.latitude,
                 "longitude" to draft.longitude,
                 "timestamp" to FieldValue.serverTimestamp(),
-                "userId" to Prefs.getOrCreateUserId(context),
+                "userId" to userId,
                 "photoUrl" to photoUrl,
                 "note" to draft.note.ifBlank { null },
-                "status" to "Pending"
+                "status" to ReportStatus.PENDING,
+                "barangay" to draft.barangay
             )
 
             setDocument(docRef, data)

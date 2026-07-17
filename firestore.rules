@@ -1,0 +1,38 @@
+rules_version = '2';
+
+// Fire report writes require anonymous auth (see AuthManager.kt) and must
+// self-report the same UID the client authenticated as. Reads and status
+// updates are restricted to accounts allowlisted in responders/{uid} — see
+// the README's responder setup section for how those get created.
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function isResponder() {
+      return request.auth != null
+        && exists(/databases/$(database)/documents/responders/$(request.auth.uid));
+    }
+
+    match /fire_reports/{reportId} {
+      allow create: if request.auth != null
+        && request.resource.data.userId == request.auth.uid
+        && request.resource.data.status == "Pending"
+        && request.resource.data.keys().hasOnly(
+             ['latitude', 'longitude', 'timestamp', 'userId', 'photoUrl', 'note', 'status', 'barangay']
+           );
+      allow read: if isResponder();
+      allow update: if isResponder()
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status'])
+        && request.resource.data.status in
+             ['Accepted', 'Responding', 'Arrived', 'Fire Out', 'False Alarm'];
+      allow delete: if false;
+    }
+
+    // Responder allowlist. Documents here are created manually by the
+    // project admin (Firebase console), never by the app itself — clients
+    // can only read their own entry, to check "am I a responder".
+    match /responders/{uid} {
+      allow read: if request.auth != null && request.auth.uid == uid;
+      allow write: if false;
+    }
+  }
+}

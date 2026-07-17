@@ -28,12 +28,14 @@ android {
         targetCompatibility = JavaVersion.VERSION_17
     }
 
-    kotlinOptions {
-        jvmTarget = "17"
-    }
-
     buildFeatures {
         viewBinding = true
+    }
+}
+
+kotlin {
+    compilerOptions {
+        jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17)
     }
 }
 
@@ -56,16 +58,26 @@ dependencies {
     // GPS location for alert messages
     implementation("com.google.android.gms:play-services-location:21.3.0")
 
-    // One-tap fire reporting: Firestore for report records, Storage for attached photos
+    // One-tap fire reporting: Firestore for report records, Storage for attached
+    // photos, anonymous Auth to identify a report's submitter, Messaging as the
+    // infrastructure for a future push-based alert channel (see ROADMAP.md V2-6)
     implementation(platform("com.google.firebase:firebase-bom:34.16.0"))
     implementation("com.google.firebase:firebase-firestore")
     implementation("com.google.firebase:firebase-storage")
+    implementation("com.google.firebase:firebase-auth")
+    implementation("com.google.firebase:firebase-messaging")
 
     // Firestore pulls in gRPC's own Guava dependency, which otherwise collides
     // with the ListenableFuture stub CameraX expects (compile error: "Cannot
     // access class 'com.google.common.util.concurrent.ListenableFuture'").
     // Forcing one consistent Android-flavored Guava across the graph fixes it.
     implementation("com.google.guava:guava:33.6.0-android")
+
+    // Responder dashboard: live incident list + status updates.
+    // Pinned to 1.3.2 (not the newer 1.4.0) because 1.4.0 requires
+    // compileSdk 35+, and AGP 8.4.0 here only supports up to compileSdk 34.
+    implementation("androidx.recyclerview:recyclerview:1.3.2")
+    implementation("io.coil-kt:coil:2.7.0")
 
     // Optional ML upgrade path for smoke/fire classification
     implementation("org.tensorflow:tensorflow-lite:2.14.0")

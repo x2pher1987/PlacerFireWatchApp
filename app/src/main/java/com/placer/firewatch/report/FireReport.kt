@@ -7,5 +7,6 @@ data class FireReportDraft(
     val latitude: Double,
     val longitude: Double,
     val note: String,
-    val photoUri: Uri?
+    val photoUri: Uri?,
+    val barangay: String
 )

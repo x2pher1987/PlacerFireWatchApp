@@ -38,10 +38,28 @@
             android:exported="false"
             android:label="@string/settings_title" />
 
+        <activity
+            android:name=".responder.ResponderLoginActivity"
+            android:exported="false"
+            android:label="@string/responder_login_title" />
+
+        <activity
+            android:name=".responder.ResponderDashboardActivity"
+            android:exported="false"
+            android:label="@string/responder_dashboard_title" />
+
         <service
             android:name=".MonitoringService"
             android:exported="false"
             android:foregroundServiceType="camera" />
+
+        <service
+            android:name=".messaging.FireWatchMessagingService"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="com.google.firebase.MESSAGING_EVENT" />
+            </intent-filter>
+        </service>
 
         <receiver
             android:name=".BootReceiver"

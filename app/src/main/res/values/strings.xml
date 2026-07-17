@@ -27,4 +27,25 @@
     <string name="report_submitting">Submitting fire report…</string>
     <string name="report_submitted_success">Fire report submitted successfully.</string>
     <string name="report_submitted_failure">Could not submit the fire report. Check your connection and try again.</string>
+
+    <!-- Responder dashboard -->
+    <string name="responder_login_link">Responder Login</string>
+    <string name="responder_login_title">Responder Login</string>
+    <string name="responder_dashboard_title">Incidents</string>
+    <string name="responder_email_hint">Email</string>
+    <string name="responder_password_hint">Password</string>
+    <string name="responder_login_button">Log In</string>
+    <string name="responder_login_missing_fields">Enter both email and password.</string>
+    <string name="responder_login_failed">Login failed. Check your email and password.</string>
+    <string name="responder_logout">Log Out</string>
+    <string name="responder_no_incidents">No incidents reported yet.</string>
+    <string name="responder_dashboard_load_failed">Could not load incidents: %1$s</string>
+    <string name="responder_status_update_failed">Could not update status. Try again.</string>
+    <string name="responder_unknown_barangay">Location not specified</string>
+    <string name="responder_coordinates_format">%1$.5f, %2$.5f</string>
+    <string name="responder_time_unknown">Time unknown</string>
+    <string name="responder_reporter_format">Reporter: %1$s</string>
+    <string name="responder_no_note">No note provided</string>
+    <string name="responder_update_status">Update Status</string>
+    <string name="responder_photo_description">Incident photo</string>
 </resources>

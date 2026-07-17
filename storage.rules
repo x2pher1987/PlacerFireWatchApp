@@ -1,0 +1,15 @@
+rules_version = '2';
+
+// Fire report photo uploads require anonymous auth (see AuthManager.kt),
+// capped at 10MB, and must actually be an image. No in-app read feature
+// yet, so client reads stay closed.
+service firebase.storage {
+  match /b/{bucket}/o {
+    match /fire_report_photos/{fileName} {
+      allow write: if request.auth != null
+        && request.resource.size < 10 * 1024 * 1024
+        && request.resource.contentType.matches('image/.*');
+      allow read: if false;
+    }
+  }
+}

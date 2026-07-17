@@ -1,7 +1,6 @@
 package com.placer.firewatch.util
 
 import android.content.Context
-import java.util.UUID
 
 /**
  * Thin wrapper around SharedPreferences for all user-configurable settings.
@@ -19,7 +18,6 @@ object Prefs {
     private const val KEY_LOCATION_LABEL = "location_label"
     private const val KEY_SENSITIVITY = "sensitivity"
     private const val KEY_MONITORING_ENABLED = "monitoring_enabled"
-    private const val KEY_USER_ID = "user_id"
 
     private const val DEFAULT_NUMBERS = "911"
     private const val DEFAULT_LOCATION_LABEL = "Placer, Masbate"
@@ -56,18 +54,5 @@ object Prefs {
 
     fun setMonitoringEnabled(context: Context, enabled: Boolean) {
         prefs(context).edit().putBoolean(KEY_MONITORING_ENABLED, enabled).apply()
-    }
-
-    /**
-     * Stable per-install identifier used to tag submitted fire reports.
-     * Generated once and persisted — there's no account system, so this is
-     * not tied to a real person, just this app install.
-     */
-    fun getOrCreateUserId(context: Context): String {
-        val existing = prefs(context).getString(KEY_USER_ID, null)
-        if (existing != null) return existing
-        val generated = UUID.randomUUID().toString()
-        prefs(context).edit().putString(KEY_USER_ID, generated).apply()
-        return generated
     }
 }

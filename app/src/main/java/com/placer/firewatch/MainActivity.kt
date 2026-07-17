@@ -24,6 +24,7 @@ import com.placer.firewatch.detection.AlertTrigger
 import com.placer.firewatch.location.LocationProvider
 import com.placer.firewatch.report.FireReportDraft
 import com.placer.firewatch.report.FireReportRepository
+import com.placer.firewatch.responder.ResponderLoginActivity
 import com.placer.firewatch.util.Prefs
 import java.io.File
 import kotlinx.coroutines.launch
@@ -97,6 +98,9 @@ class MainActivity : AppCompatActivity() {
         binding.btnCallBfp.setOnClickListener { callBfp() }
         binding.btnSettings.setOnClickListener {
             startActivity(Intent(this, SettingsActivity::class.java))
+        }
+        binding.linkResponderLogin.setOnClickListener {
+            startActivity(Intent(this, ResponderLoginActivity::class.java))
         }
 
         requestNeededPermissions()
@@ -242,8 +246,8 @@ class MainActivity : AppCompatActivity() {
     private fun submitFireReport(latitude: Double, longitude: Double, note: String, photoUri: Uri?) {
         Toast.makeText(this, R.string.report_submitting, Toast.LENGTH_SHORT).show()
         lifecycleScope.launch {
-            val draft = FireReportDraft(latitude, longitude, note, photoUri)
-            val result = FireReportRepository().submit(this@MainActivity, draft)
+            val draft = FireReportDraft(latitude, longitude, note, photoUri, Prefs.getLocationLabel(this@MainActivity))
+            val result = FireReportRepository().submit(draft)
             val messageRes = if (result.isSuccess) {
                 R.string.report_submitted_success
             } else {
