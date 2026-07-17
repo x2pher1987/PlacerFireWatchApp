@@ -6,6 +6,15 @@
     android:background="@color/background_dark">
 
     <com.google.android.material.button.MaterialButton
+        android:id="@+id/btnMapView"
+        style="@style/Widget.MaterialComponents.Button.TextButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/responder_map_view"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <com.google.android.material.button.MaterialButton
         android:id="@+id/btnLogout"
         style="@style/Widget.MaterialComponents.Button.TextButton"
         android:layout_width="wrap_content"

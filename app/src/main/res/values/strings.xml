@@ -48,4 +48,9 @@
     <string name="responder_no_note">No note provided</string>
     <string name="responder_update_status">Update Status</string>
     <string name="responder_photo_description">Incident photo</string>
+
+    <!-- Live Fire Map -->
+    <string name="responder_map_title">Live Fire Map</string>
+    <string name="responder_map_view">Map View</string>
+    <string name="responder_dialog_close">Close</string>
 </resources>

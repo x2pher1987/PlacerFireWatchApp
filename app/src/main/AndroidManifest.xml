@@ -48,6 +48,11 @@
             android:exported="false"
             android:label="@string/responder_dashboard_title" />
 
+        <activity
+            android:name=".responder.LiveFireMapActivity"
+            android:exported="false"
+            android:label="@string/responder_map_title" />
+
         <service
             android:name=".MonitoringService"
             android:exported="false"
@@ -78,6 +83,14 @@
                 android:name="android.support.FILE_PROVIDER_PATHS"
                 android:resource="@xml/file_paths" />
         </provider>
+
+        <meta-data
+            android:name="com.google.android.geo.API_KEY"
+            android:value="${MAPS_API_KEY}" />
+
+        <meta-data
+            android:name="com.google.android.gms.version"
+            android:value="@integer/google_play_services_version" />
 
     </application>
 

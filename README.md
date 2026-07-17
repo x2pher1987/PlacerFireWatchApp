@@ -169,7 +169,8 @@ and status. Tapping **Update Status** on an incident lets a responder set
 it to Accepted, Responding, Arrived, Fire Out, or False Alarm; the change
 is written straight to Firestore and every responder's dashboard updates
 immediately (no refresh needed) because the list is backed by a live
-Firestore listener, not a one-time fetch.
+Firestore listener, not a one-time fetch. The same feed is also available
+as a map (**Map View** on the dashboard) — see "Live Fire Map" below.
 
 **This repo ships with a placeholder `app/google-services.json`** — a
 structurally valid file with obviously fake values
@@ -282,6 +283,44 @@ downloaded in step 2, rebuild, and the app writes real report
 documents/photos to your project instead of failing against the
 placeholder.
 
+## Live Fire Map (Google Maps setup)
+
+From the responder dashboard, **Map View** opens a map showing every
+incident as a colored marker — red for Pending, orange for an in-progress
+response (Accepted/Responding/Arrived), green once resolved (Fire
+Out/False Alarm) — updating live as Firestore changes. Tapping a marker
+opens the same incident details and status actions as the dashboard list.
+It's behind the same responder login as the dashboard, not public.
+
+This needs a **Google Maps API key**, which is a separate credential from
+Firebase (different console, different product). Unlike
+`google-services.json`, this repo does **not** ship even a placeholder
+file for it — it's read from `local.properties`, which is already
+gitignored (it holds your Android SDK path) and never committed, so
+there's no risk of a real key accidentally landing in git history. If the
+key is missing, the build still succeeds (see `app/build.gradle.kts`) —
+the map screen just won't load tiles until you add one.
+
+1. Go to the [Google Cloud console](https://console.cloud.google.com/)
+   and select the **same project** your Firebase project created (Firebase
+   projects are Google Cloud projects — look for it in the project
+   picker by the name you gave it) — this keeps everything under one
+   project instead of creating a second, unrelated one.
+2. **APIs & Services → Library** → search **"Maps SDK for Android"** →
+   **Enable**.
+3. **APIs & Services → Credentials → Create credentials → API key**.
+   Copy the generated key.
+4. (Recommended) Click the new key → **Restrict key** → **Application
+   restrictions: Android apps** → add package name `com.placer.firewatch`
+   with your debug/release signing certificate's SHA-1 (Android Studio:
+   Gradle panel → app → Tasks → android → `signingReport`). This stops
+   the key from being usable by anyone who extracts it from the APK.
+5. In this repo, open (or create) `local.properties` and add a line:
+   ```
+   MAPS_API_KEY=your_real_key_here
+   ```
+6. Rebuild. The map now loads real tiles instead of a blank/gray screen.
+
 ## How alerting works
 
 - **Automatic**: when the detector flags fire or smoke for several
@@ -355,8 +394,10 @@ app/src/main/java/com/placer/firewatch/
 │   └── IncidentRepository.kt — live incident listener + status updates
 ├── responder/
 │   ├── ResponderLoginActivity.kt — email/password login for BFP staff
-│   ├── ResponderDashboardActivity.kt — live incident list, logout
-│   └── IncidentAdapter.kt   — RecyclerView list + per-incident status action menu
+│   ├── ResponderDashboardActivity.kt — live incident list, logout, map entry point
+│   ├── IncidentAdapter.kt   — RecyclerView list + per-incident status action menu
+│   ├── IncidentDetailsView.kt — incident binding + status menu, shared by list and map
+│   └── LiveFireMapActivity.kt — colored real-time markers, tap for incident details
 └── util/                    — SharedPreferences wrapper, image conversion
 ```
 

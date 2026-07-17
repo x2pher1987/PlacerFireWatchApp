@@ -1,5 +1,6 @@
 package com.placer.firewatch.responder
 
+import android.content.Intent
 import android.os.Bundle
 import android.view.View
 import android.widget.Toast
@@ -39,6 +40,9 @@ class ResponderDashboardActivity : AppCompatActivity() {
         binding.btnLogout.setOnClickListener {
             FirebaseAuth.getInstance().signOut()
             finish()
+        }
+        binding.btnMapView.setOnClickListener {
+            startActivity(Intent(this, LiveFireMapActivity::class.java))
         }
     }
 

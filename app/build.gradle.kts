@@ -1,8 +1,24 @@
+import java.util.Properties
+
 plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
     id("com.google.gms.google-services")
 }
+
+// The Live Fire Map needs a Google Maps API key. It's read from the
+// gitignored local.properties (never committed) so a real key never ends
+// up in source control; if it's absent (e.g. on CI, or a fresh clone),
+// this falls back to an obviously-fake placeholder so the build still
+// compiles — the map just won't load tiles until a real key is added.
+// See the README's "Live Fire Map (Google Maps setup)" section.
+val localProperties = Properties().apply {
+    val localPropertiesFile = rootProject.file("local.properties")
+    if (localPropertiesFile.exists()) {
+        localPropertiesFile.inputStream().use { load(it) }
+    }
+}
+val mapsApiKey: String = localProperties.getProperty("MAPS_API_KEY") ?: "REPLACE_WITH_YOUR_MAPS_API_KEY"
 
 android {
     namespace = "com.placer.firewatch"
@@ -14,6 +30,7 @@ android {
         targetSdk = 34
         versionCode = 1
         versionName = "1.0"
+        manifestPlaceholders["MAPS_API_KEY"] = mapsApiKey
     }
 
     buildTypes {
@@ -78,6 +95,9 @@ dependencies {
     // compileSdk 35+, and AGP 8.4.0 here only supports up to compileSdk 34.
     implementation("androidx.recyclerview:recyclerview:1.3.2")
     implementation("io.coil-kt:coil:2.7.0")
+
+    // Live Fire Map
+    implementation("com.google.android.gms:play-services-maps:20.0.0")
 
     // Optional ML upgrade path for smoke/fire classification
     implementation("org.tensorflow:tensorflow-lite:2.14.0")
