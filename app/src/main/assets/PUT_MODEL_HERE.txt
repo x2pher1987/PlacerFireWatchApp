@@ -1,0 +1,18 @@
+This app runs fine with no file in this folder — it uses a built-in color
+heuristic (HeuristicClassifier) that needs zero setup.
+
+To upgrade to real machine-learning detection, train an image classifier
+(3 classes: fire, smoke, normal) and export it as TensorFlow Lite, then
+place it here as:
+
+    fire_smoke_model.tflite
+
+The app will detect the file automatically at startup and switch to it
+(see ClassifierFactory.kt). No code changes needed unless your model's
+input size or output order differs from what's documented in
+TFLiteClassifier.kt.
+
+Easiest way to train one with no ML background: Google's Teachable Machine
+(teachablemachine.withgoogle.com) — feed it a few hundred photos/frames of
+fire, smoke, and normal scenes from the actual location you're monitoring,
+then export as TensorFlow Lite (Floating point).

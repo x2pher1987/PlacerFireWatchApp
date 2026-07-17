@@ -1,0 +1,10 @@
+<resources>
+    <color name="fire_red">#D32F2F</color>
+    <color name="fire_orange">#F57C00</color>
+    <color name="smoke_gray">#607D8B</color>
+    <color name="safe_green">#2E7D32</color>
+    <color name="background_dark">#121212</color>
+    <color name="surface_dark">#1E1E1E</color>
+    <color name="text_primary">#FFFFFF</color>
+    <color name="text_secondary">#B0B0B0</color>
+</resources>
