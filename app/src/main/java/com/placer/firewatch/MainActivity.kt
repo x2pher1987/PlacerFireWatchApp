@@ -6,18 +6,26 @@ import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
+import android.view.View
+import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.camera.core.CameraSelector
 import androidx.camera.core.Preview
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.core.content.ContextCompat
+import androidx.core.content.FileProvider
 import androidx.lifecycle.lifecycleScope
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.placer.firewatch.alert.AlertSender
 import com.placer.firewatch.databinding.ActivityMainBinding
+import com.placer.firewatch.databinding.DialogReportFireBinding
 import com.placer.firewatch.detection.AlertTrigger
 import com.placer.firewatch.location.LocationProvider
+import com.placer.firewatch.report.FireReportDraft
+import com.placer.firewatch.report.FireReportRepository
 import com.placer.firewatch.util.Prefs
+import java.io.File
 import kotlinx.coroutines.launch
 
 class MainActivity : AppCompatActivity() {
@@ -47,6 +55,34 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    private var reportDialogBinding: DialogReportFireBinding? = null
+    private var pendingPhotoUri: Uri? = null
+    private var attachedPhotoUri: Uri? = null
+
+    private val reportLocationPermissionLauncher = registerForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) { granted ->
+        if (granted) {
+            beginFireReportFlow()
+        } else {
+            Toast.makeText(this, R.string.report_location_permission_required, Toast.LENGTH_LONG).show()
+        }
+    }
+
+    private val takePictureLauncher = registerForActivityResult(
+        ActivityResultContracts.TakePicture()
+    ) { success ->
+        val photoUri = pendingPhotoUri
+        if (success && photoUri != null) {
+            attachedPhotoUri = photoUri
+            reportDialogBinding?.imagePhotoPreview?.apply {
+                setImageURI(photoUri)
+                visibility = View.VISIBLE
+            }
+            reportDialogBinding?.btnAttachPhoto?.setText(R.string.report_retake_photo)
+        }
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
@@ -55,6 +91,7 @@ class MainActivity : AppCompatActivity() {
         monitoringActive = Prefs.isMonitoringEnabled(this)
         updateToggleButtonLabel()
 
+        binding.btnOneTapReport.setOnClickListener { onReportFireTapped() }
         binding.btnToggleMonitoring.setOnClickListener { toggleMonitoring() }
         binding.btnReportFire.setOnClickListener { sendManualReport() }
         binding.btnCallBfp.setOnClickListener { callBfp() }
@@ -145,5 +182,74 @@ class MainActivity : AppCompatActivity() {
     private fun callBfp() {
         val number = Prefs.getBfpNumbers(this).firstOrNull() ?: "911"
         startActivity(Intent(Intent.ACTION_DIAL, Uri.parse("tel:$number")))
+    }
+
+    private fun onReportFireTapped() {
+        val hasLocationPermission = ContextCompat.checkSelfPermission(
+            this, Manifest.permission.ACCESS_FINE_LOCATION
+        ) == PackageManager.PERMISSION_GRANTED
+
+        if (hasLocationPermission) {
+            beginFireReportFlow()
+        } else {
+            reportLocationPermissionLauncher.launch(Manifest.permission.ACCESS_FINE_LOCATION)
+        }
+    }
+
+    private fun beginFireReportFlow() {
+        Toast.makeText(this, R.string.report_getting_location, Toast.LENGTH_SHORT).show()
+        lifecycleScope.launch {
+            val location = LocationProvider(this@MainActivity).getCurrentLocation()
+            if (location == null) {
+                Toast.makeText(this@MainActivity, R.string.report_location_failed, Toast.LENGTH_LONG).show()
+            } else {
+                showReportConfirmationDialog(location.latitude, location.longitude)
+            }
+        }
+    }
+
+    private fun showReportConfirmationDialog(latitude: Double, longitude: Double) {
+        attachedPhotoUri = null
+        val dialogBinding = DialogReportFireBinding.inflate(layoutInflater)
+        reportDialogBinding = dialogBinding
+        dialogBinding.textLocationSummary.text =
+            getString(R.string.report_location_summary, latitude, longitude)
+
+        dialogBinding.btnAttachPhoto.setOnClickListener {
+            val uri = createPhotoUri()
+            pendingPhotoUri = uri
+            takePictureLauncher.launch(uri)
+        }
+
+        MaterialAlertDialogBuilder(this)
+            .setTitle(R.string.report_confirm_title)
+            .setView(dialogBinding.root)
+            .setPositiveButton(R.string.report_send) { _, _ ->
+                val note = dialogBinding.editReportNote.text?.toString()?.trim().orEmpty()
+                submitFireReport(latitude, longitude, note, attachedPhotoUri)
+            }
+            .setNegativeButton(R.string.report_cancel, null)
+            .setOnDismissListener { reportDialogBinding = null }
+            .show()
+    }
+
+    private fun createPhotoUri(): Uri {
+        val photoDir = File(cacheDir, "fire_report_photos").apply { mkdirs() }
+        val photoFile = File(photoDir, "report_${System.currentTimeMillis()}.jpg")
+        return FileProvider.getUriForFile(this, "$packageName.fileprovider", photoFile)
+    }
+
+    private fun submitFireReport(latitude: Double, longitude: Double, note: String, photoUri: Uri?) {
+        Toast.makeText(this, R.string.report_submitting, Toast.LENGTH_SHORT).show()
+        lifecycleScope.launch {
+            val draft = FireReportDraft(latitude, longitude, note, photoUri)
+            val result = FireReportRepository().submit(this@MainActivity, draft)
+            val messageRes = if (result.isSuccess) {
+                R.string.report_submitted_success
+            } else {
+                R.string.report_submitted_failure
+            }
+            Toast.makeText(this@MainActivity, messageRes, Toast.LENGTH_LONG).show()
+        }
     }
 }

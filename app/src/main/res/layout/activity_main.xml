@@ -36,6 +36,16 @@
         app:layout_constraintBottom_toBottomOf="parent">
 
         <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnOneTapReport"
+            android:layout_width="match_parent"
+            android:layout_height="96dp"
+            android:backgroundTint="@color/fire_red"
+            android:text="@string/report_fire_one_tap"
+            android:textSize="24sp"
+            android:textStyle="bold"
+            android:layout_marginBottom="12dp" />
+
+        <com.google.android.material.button.MaterialButton
             android:id="@+id/btnToggleMonitoring"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"

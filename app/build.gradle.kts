@@ -1,6 +1,7 @@
 plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
+    id("com.google.gms.google-services")
 }
 
 android {
@@ -54,6 +55,17 @@ dependencies {
 
     // GPS location for alert messages
     implementation("com.google.android.gms:play-services-location:21.3.0")
+
+    // One-tap fire reporting: Firestore for report records, Storage for attached photos
+    implementation(platform("com.google.firebase:firebase-bom:34.16.0"))
+    implementation("com.google.firebase:firebase-firestore")
+    implementation("com.google.firebase:firebase-storage")
+
+    // Firestore pulls in gRPC's own Guava dependency, which otherwise collides
+    // with the ListenableFuture stub CameraX expects (compile error: "Cannot
+    // access class 'com.google.common.util.concurrent.ListenableFuture'").
+    // Forcing one consistent Android-flavored Guava across the graph fixes it.
+    implementation("com.google.guava:guava:33.6.0-android")
 
     // Optional ML upgrade path for smoke/fire classification
     implementation("org.tensorflow:tensorflow-lite:2.14.0")

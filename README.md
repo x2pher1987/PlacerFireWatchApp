@@ -149,6 +149,40 @@ that's a more traditional and often more reliable approach than camera
 vision — tell me your hardware and I can wire up a receiver for it
 instead of, or alongside, the camera path.
 
+## One-tap fire reporting (Firebase setup)
+
+The big red **🔥 REPORT FIRE** button on the home screen is a separate
+reporting path from the SMS alerting described above: it grabs a fresh GPS
+fix, lets you optionally attach a photo and a short note, and on **Send**
+writes a report document to **Firebase Firestore** (with the photo, if
+any, uploaded to **Firebase Storage** first so its download URL can be
+included). Each report includes GPS coordinates, a server timestamp, a
+per-install user ID, the photo URL (if attached), the note, and a
+`status` field starting as `"Pending"`.
+
+**This repo ships with a placeholder `app/google-services.json`** — a
+structurally valid file with obviously fake values
+(`REPLACE-WITH-YOUR-FIREBASE-PROJECT-ID`, etc.), the same pattern already
+used here for the unconfirmed BFP phone number and the optional TFLite
+model. It's there so the project **compiles and builds** without you
+doing anything first. It does **not** point at a real backend — reports
+will fail to submit (you'll see the "could not submit" toast) until you
+swap it for your own:
+
+1. Create a free project at [Firebase console](https://console.firebase.google.com/).
+2. Add an Android app to it with package name `com.placer.firewatch`.
+3. Enable **Firestore Database** and **Storage** in that project (test
+   mode is fine to start; tighten security rules before wider rollout —
+   the current client code has no auth, so anyone with the app can write
+   reports and upload photos).
+4. Download the real `google-services.json` from Project Settings → Your
+   apps, and replace `app/google-services.json` in this repo with it.
+5. Rebuild. The app will now write real report documents/photos to your
+   project.
+
+There's no login system — the "User ID" field is a random UUID generated
+once per install (see `Prefs.getOrCreateUserId`), not a real account.
+
 ## How alerting works
 
 - **Automatic**: when the detector flags fire or smoke for several
@@ -163,14 +197,19 @@ instead of, or alongside, the camera path.
 - **Direct call**: the **"Call BFP / 911"** button opens the phone dialer
   pre-filled with the first configured number — it does not place the
   call automatically, so a human always confirms before it's dialed.
+- **One-tap report**: the **"🔥 REPORT FIRE"** button is a separate path
+  from the above — it writes a report (location, timestamp, optional
+  photo/note, status `"Pending"`) to Firebase instead of sending SMS. See
+  "One-tap fire reporting (Firebase setup)" above.
 
 ## Permissions used, and why
 
 | Permission | Why |
 |---|---|
-| Camera | reads the live feed for detection |
-| Location (fine/coarse) | tags alerts with GPS coordinates |
+| Camera | reads the live feed for detection, and captures the optional fire-report photo |
+| Location (fine/coarse) | tags alerts and fire reports with GPS coordinates |
 | Send SMS | sends the alert text itself |
+| Internet / network state | required by Firebase Firestore/Storage for one-tap fire reporting |
 | Foreground service (+ camera type) | keeps detection running with the screen off |
 | Post notifications | shows the required "monitoring active" notification |
 | Wake lock | keeps the CPU from sleeping mid-monitoring |
@@ -205,8 +244,11 @@ app/src/main/java/com/placer/firewatch/
 │   ├── ClassifierFactory.kt — picks whichever is available
 │   └── DetectionTracker.kt  — requires consecutive hits before alerting
 ├── alert/AlertSender.kt     — composes and sends the SMS
-├── location/LocationProvider.kt — GPS fix via FusedLocationProviderClient
+├── location/LocationProvider.kt — GPS fix (cached + fresh) via FusedLocationProviderClient
 ├── notification/NotificationHelper.kt — foreground service notification
+├── report/
+│   ├── FireReport.kt        — one-tap report draft data class
+│   └── FireReportRepository.kt — writes reports to Firestore, photos to Storage
 └── util/                    — SharedPreferences wrapper, image conversion
 ```
 
