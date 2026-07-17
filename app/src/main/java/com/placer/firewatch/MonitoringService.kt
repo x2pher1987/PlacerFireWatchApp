@@ -100,7 +100,7 @@ class MonitoringService : LifecycleService() {
         cameraProviderFuture.addListener({
             val cameraProvider = cameraProviderFuture.get()
             val imageAnalysis = ImageAnalysis.Builder()
-                .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_LATEST_ONLY)
+                .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
                 .build()
 
             imageAnalysis.setAnalyzer(cameraExecutor) { imageProxy ->
