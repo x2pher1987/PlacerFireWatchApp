@@ -109,6 +109,7 @@
         android:layout_height="0dp"
         android:clipToPadding="false"
         android:padding="4dp"
+        android:layoutAnimation="@anim/layout_animation_fall_down"
         app:layout_constraintTop_toBottomOf="@id/scrollFilters"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"

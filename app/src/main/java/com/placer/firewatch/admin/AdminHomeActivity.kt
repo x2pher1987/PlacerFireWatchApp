@@ -39,6 +39,7 @@ class AdminHomeActivity : AppCompatActivity() {
     private val exportRepository = ReportExportRepository()
     private var listenerRegistration: ListenerRegistration? = null
     private lateinit var adapter: ResponderApplicationAdapter
+    private var hasPlayedEntranceAnimation = false
 
     private val createXlsxLauncher = registerForActivityResult(
         ActivityResultContracts.CreateDocument("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
@@ -94,6 +95,10 @@ class AdminHomeActivity : AppCompatActivity() {
         super.onStart()
         listenerRegistration = repository.listenForPendingApplications(
             onUpdate = { applications ->
+                if (!hasPlayedEntranceAnimation && applications.isNotEmpty()) {
+                    binding.recyclerApplications.scheduleLayoutAnimation()
+                    hasPlayedEntranceAnimation = true
+                }
                 adapter.submitList(applications)
                 binding.textEmpty.visibility = if (applications.isEmpty()) View.VISIBLE else View.GONE
             },

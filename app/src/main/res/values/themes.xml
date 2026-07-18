@@ -5,5 +5,11 @@
         <item name="colorOnPrimary">@color/text_primary</item>
         <item name="colorSecondary">@color/smoke_gray</item>
         <item name="android:windowBackground">@color/background_dark</item>
+
+        <!-- Section 14: rounded, card-based dark theme — see styles.xml for rationale. -->
+        <item name="shapeAppearanceSmallComponent">@style/ShapeAppearance.PlacerFireWatch.SmallComponent</item>
+        <item name="shapeAppearanceMediumComponent">@style/ShapeAppearance.PlacerFireWatch.MediumComponent</item>
+        <item name="shapeAppearanceLargeComponent">@style/ShapeAppearance.PlacerFireWatch.LargeComponent</item>
+        <item name="materialCardViewStyle">@style/Widget.PlacerFireWatch.CardView</item>
     </style>
 </resources>

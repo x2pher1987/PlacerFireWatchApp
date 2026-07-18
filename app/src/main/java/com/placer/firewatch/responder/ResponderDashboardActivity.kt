@@ -42,6 +42,7 @@ class ResponderDashboardActivity : AppCompatActivity() {
     private var allIncidents: List<Incident> = emptyList()
     private var currentFilter: Filter = Filter.ALL
     private var knownIncidentIds: Set<String>? = null
+    private var hasPlayedEntranceAnimation = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -114,6 +115,13 @@ class ResponderDashboardActivity : AppCompatActivity() {
 
     private fun renderFilteredList() {
         val filtered = allIncidents.filter { matchesFilter(it.status, currentFilter) }
+        // Best-effort: only the very first render gets the fall-in entrance
+        // animation, so switching filters or a live Firestore update later
+        // doesn't replay it on every row.
+        if (!hasPlayedEntranceAnimation && filtered.isNotEmpty()) {
+            binding.recyclerIncidents.scheduleLayoutAnimation()
+            hasPlayedEntranceAnimation = true
+        }
         adapter.submitList(filtered)
         binding.textEmpty.visibility = if (filtered.isEmpty()) View.VISIBLE else View.GONE
     }
