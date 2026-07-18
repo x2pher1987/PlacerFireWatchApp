@@ -12,9 +12,11 @@ import com.google.firebase.firestore.ListenerRegistration
 import com.placer.firewatch.BuildConfig
 import com.placer.firewatch.LandingActivity
 import com.placer.firewatch.R
+import com.placer.firewatch.alert.ResponderAlertNotifier
 import com.placer.firewatch.databinding.ActivityResponderDashboardBinding
 import com.placer.firewatch.report.Incident
 import com.placer.firewatch.report.IncidentRepository
+import com.placer.firewatch.report.ReportStatus
 import kotlinx.coroutines.launch
 
 /**
@@ -35,6 +37,7 @@ class ResponderDashboardActivity : AppCompatActivity() {
     private lateinit var adapter: IncidentAdapter
     private var isDevSession = false
     private var devIncidents: List<Incident> = emptyList()
+    private var knownIncidentIds: Set<String>? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -77,6 +80,7 @@ class ResponderDashboardActivity : AppCompatActivity() {
             onUpdate = { incidents ->
                 adapter.submitList(incidents)
                 binding.textEmpty.visibility = if (incidents.isEmpty()) View.VISIBLE else View.GONE
+                alertOnNewIncidents(incidents)
             },
             onError = { e ->
                 Toast.makeText(
@@ -92,9 +96,26 @@ class ResponderDashboardActivity : AppCompatActivity() {
         super.onStop()
         listenerRegistration?.remove()
         listenerRegistration = null
+        knownIncidentIds = null
+    }
+
+    /**
+     * Fires the Section 8 alert (channel/priority/vibration keyed by report
+     * type) only for incidents that appeared after this listener started —
+     * the first snapshot is the dashboard's existing backlog, not "new".
+     */
+    private fun alertOnNewIncidents(incidents: List<Incident>) {
+        val previous = knownIncidentIds
+        val currentIds = incidents.map { it.id }.toSet()
+        if (previous != null) {
+            incidents.filter { it.id !in previous && it.status == ReportStatus.PENDING }
+                .forEach { ResponderAlertNotifier.notifyNewIncident(this, it.type, it.id, it.barangay) }
+        }
+        knownIncidentIds = currentIds
     }
 
     private fun updateIncidentStatus(reportId: String, newStatus: String) {
+        ResponderAlertNotifier.acknowledge(this, reportId)
         if (isDevSession) {
             devIncidents = devIncidents.map { if (it.id == reportId) it.copy(status = newStatus) else it }
             adapter.submitList(devIncidents)

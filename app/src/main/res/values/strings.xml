@@ -22,6 +22,16 @@
     <string name="about_verse_text">"By the blessing of the upright the city is exalted: but it is overthrown by the mouth of the wicked."</string>
     <string name="about_verse_reference">Proverbs 11:11 (KJV)</string>
 
+    <!-- Responder alerts (Section 8) -->
+    <string name="alert_channel_fire">Fire Alerts</string>
+    <string name="alert_channel_smoke">Smoke Alerts</string>
+    <string name="alert_channel_suspected">Suspected Fire Alerts</string>
+    <string name="alert_title_fire">🔥 FIRE reported</string>
+    <string name="alert_title_smoke">🌫 Smoke reported</string>
+    <string name="alert_title_suspected">⚠ Suspected fire reported</string>
+    <string name="alert_body_with_barangay">Barangay %1$s — tap to view</string>
+    <string name="alert_body_no_barangay">Location not specified — tap to view</string>
+
     <!-- Report types (Section 6) -->
     <string name="report_fire_now_button">🔥 Report Fire Now</string>
     <string name="report_smoke_button">🌫 Report Smoke</string>

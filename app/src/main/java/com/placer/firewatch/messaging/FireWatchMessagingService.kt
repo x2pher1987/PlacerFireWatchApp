@@ -3,13 +3,18 @@ package com.placer.firewatch.messaging
 import android.util.Log
 import com.google.firebase.messaging.FirebaseMessagingService
 import com.google.firebase.messaging.RemoteMessage
+import com.placer.firewatch.alert.ResponderAlertNotifier
+import com.placer.firewatch.report.ReportType
 
 /**
- * Infrastructure only, for now: no backend currently sends anything to this
- * app, and there's no server-side piece that consumes registration tokens.
- * This exists so Cloud Messaging is fully wired up ahead of a future
- * push-based alert channel (see ROADMAP.md V2-6 — an alternate/fallback
- * alert path for deployments where SMS can't reach a cell network).
+ * No backend currently sends anything to this app — there's no Cloud
+ * Function watching Firestore writes yet (that needs the Blaze billing
+ * plan, a manual account decision — see ROADMAP.md). This is ready to
+ * receive that push the moment it exists: a message with data payload
+ * keys "type" (Fire/Smoke/Suspected Fire), "incidentId", and optionally
+ * "barangay" reuses the exact same channel/priority/vibration behavior
+ * that ResponderDashboardActivity already triggers locally for incidents
+ * seen while the dashboard is open.
  */
 class FireWatchMessagingService : FirebaseMessagingService() {
 
@@ -25,5 +30,10 @@ class FireWatchMessagingService : FirebaseMessagingService() {
     override fun onMessageReceived(message: RemoteMessage) {
         super.onMessageReceived(message)
         Log.i(TAG, "FCM message received from ${message.from}")
+
+        val incidentId = message.data["incidentId"] ?: return
+        val type = message.data["type"] ?: ReportType.FIRE
+        val barangay = message.data["barangay"]
+        ResponderAlertNotifier.notifyNewIncident(this, type, incidentId, barangay)
     }
 }
