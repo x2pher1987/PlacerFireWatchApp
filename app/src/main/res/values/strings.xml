@@ -116,6 +116,7 @@
     <string name="responder_no_note">No note provided</string>
     <string name="responder_update_status">Update Status</string>
     <string name="responder_photo_description">Incident photo</string>
+    <string name="responder_get_directions">🧭 Get Directions</string>
 
     <!-- Live Fire Map -->
     <string name="responder_map_title">Live Fire Map</string>

@@ -18,6 +18,7 @@ import com.placer.firewatch.databinding.ItemIncidentBinding
 import com.placer.firewatch.report.Incident
 import com.placer.firewatch.report.IncidentRepository
 import com.placer.firewatch.report.ReportStatus
+import com.placer.firewatch.report.ReportType
 import kotlinx.coroutines.launch
 
 /**
@@ -90,7 +91,9 @@ class LiveFireMapActivity : AppCompatActivity(), OnMapReadyCallback {
                 MarkerOptions()
                     .position(LatLng(incident.latitude, incident.longitude))
                     .title(incident.barangay ?: getString(R.string.responder_unknown_barangay))
-                    .icon(BitmapDescriptorFactory.defaultMarker(markerHueFor(incident.status)))
+                    .snippet(incident.type)
+                    .icon(BitmapDescriptorFactory.defaultMarker(markerHueFor(incident.type)))
+                    .alpha(markerAlphaFor(incident.status))
             )
             marker?.tag = incident
         }
@@ -99,12 +102,18 @@ class LiveFireMapActivity : AppCompatActivity(), OnMapReadyCallback {
         }
     }
 
-    /** Red = Pending, Orange = an in-progress response, Green = resolved either way. */
-    private fun markerHueFor(status: String): Float = when (status) {
-        ReportStatus.PENDING -> BitmapDescriptorFactory.HUE_RED
-        ReportStatus.ACCEPTED, ReportStatus.RESPONDING, ReportStatus.ARRIVED -> BitmapDescriptorFactory.HUE_ORANGE
-        ReportStatus.FIRE_OUT, ReportStatus.FALSE_ALARM -> BitmapDescriptorFactory.HUE_GREEN
+    /** Color keys off report type (what it is), not status, so type is visible at a glance regardless of progress. */
+    private fun markerHueFor(type: String): Float = when (type) {
+        ReportType.FIRE -> BitmapDescriptorFactory.HUE_RED
+        ReportType.SMOKE -> BitmapDescriptorFactory.HUE_AZURE
+        ReportType.SUSPECTED_FIRE -> BitmapDescriptorFactory.HUE_ORANGE
         else -> BitmapDescriptorFactory.HUE_RED
+    }
+
+    /** Status is layered on as opacity: full for anything still active, dimmed once resolved. */
+    private fun markerAlphaFor(status: String): Float = when (status) {
+        ReportStatus.FIRE_OUT, ReportStatus.FALSE_ALARM -> 0.45f
+        else -> 1.0f
     }
 
     private fun showIncidentDialog(incident: Incident) {
