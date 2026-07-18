@@ -28,15 +28,28 @@
     <string name="report_submitted_success">Fire report submitted successfully.</string>
     <string name="report_submitted_failure">Could not submit the fire report. Check your connection and try again.</string>
 
+    <!-- Authentication (Section 1) -->
+    <string name="landing_tagline">Fire and smoke reporting for Placer, Masbate</string>
+    <string name="auth_sign_in_title">Sign In</string>
+    <string name="auth_sign_in_button">Sign In</string>
+    <string name="auth_create_account_title">Create Account</string>
+    <string name="auth_create_account_button">Create Account</string>
+    <string name="auth_email_hint">Email</string>
+    <string name="auth_password_hint">Password</string>
+    <string name="auth_confirm_password_hint">Confirm Password</string>
+    <string name="auth_full_name_hint">Full Name</string>
+    <string name="auth_missing_fields">Please fill in all required fields.</string>
+    <string name="auth_passwords_dont_match">Passwords don\'t match.</string>
+    <string name="auth_password_too_short">Password must be at least 6 characters.</string>
+    <string name="auth_sign_in_failed">Sign in failed. Check your email and password.</string>
+    <string name="auth_create_account_failed">Could not create account. Try again.</string>
+
+    <!-- Admin (placeholder — Section 4) -->
+    <string name="admin_home_title">Admin</string>
+    <string name="admin_placeholder_message">Full admin tools (approvals, reports, analytics, barangay management) are coming soon.</string>
+
     <!-- Responder dashboard -->
-    <string name="responder_login_link">Responder Login</string>
-    <string name="responder_login_title">Responder Login</string>
     <string name="responder_dashboard_title">Incidents</string>
-    <string name="responder_email_hint">Email</string>
-    <string name="responder_password_hint">Password</string>
-    <string name="responder_login_button">Log In</string>
-    <string name="responder_login_missing_fields">Enter both email and password.</string>
-    <string name="responder_login_failed">Login failed. Check your email and password.</string>
     <string name="responder_logout">Log Out</string>
     <string name="responder_no_incidents">No incidents reported yet.</string>
     <string name="responder_dashboard_load_failed">Could not load incidents: %1$s</string>

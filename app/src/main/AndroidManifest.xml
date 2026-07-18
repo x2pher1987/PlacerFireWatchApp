@@ -24,7 +24,7 @@
         android:supportsRtl="true">
 
         <activity
-            android:name=".MainActivity"
+            android:name=".LandingActivity"
             android:exported="true"
             android:screenOrientation="portrait">
             <intent-filter>
@@ -34,14 +34,29 @@
         </activity>
 
         <activity
+            android:name=".MainActivity"
+            android:exported="false"
+            android:screenOrientation="portrait" />
+
+        <activity
+            android:name=".auth.SignInActivity"
+            android:exported="false"
+            android:label="@string/auth_sign_in_title" />
+
+        <activity
+            android:name=".auth.CreateAccountActivity"
+            android:exported="false"
+            android:label="@string/auth_create_account_title" />
+
+        <activity
+            android:name=".admin.AdminHomeActivity"
+            android:exported="false"
+            android:label="@string/admin_home_title" />
+
+        <activity
             android:name=".SettingsActivity"
             android:exported="false"
             android:label="@string/settings_title" />
-
-        <activity
-            android:name=".responder.ResponderLoginActivity"
-            android:exported="false"
-            android:label="@string/responder_login_title" />
 
         <activity
             android:name=".responder.ResponderDashboardActivity"

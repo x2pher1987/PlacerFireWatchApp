@@ -12,7 +12,7 @@ import java.util.Date
  * sample incidents instead of a live Firestore listener.
  *
  * Every call site that touches this is already gated behind
- * BuildConfig.DEBUG (see ResponderLoginActivity, ResponderDashboardActivity),
+ * BuildConfig.DEBUG (see LandingActivity, SignInActivity, ResponderDashboardActivity),
  * so none of this is reachable in a release build — the button that starts
  * a dev session simply doesn't render. That said, with isMinifyEnabled =
  * false the code itself still ships inside the release APK, just dead and

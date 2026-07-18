@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
@@ -10,7 +11,7 @@
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="@string/responder_login_title"
+        android:text="@string/auth_sign_in_title"
         android:textColor="@color/text_primary"
         android:textStyle="bold"
         android:textSize="20sp"
@@ -20,7 +21,7 @@
         android:id="@+id/editEmail"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="@string/responder_email_hint"
+        android:hint="@string/auth_email_hint"
         android:inputType="textEmailAddress"
         android:textColor="@color/text_primary"
         android:layout_marginBottom="12dp" />
@@ -29,7 +30,7 @@
         android:id="@+id/editPassword"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="@string/responder_password_hint"
+        android:hint="@string/auth_password_hint"
         android:inputType="textPassword"
         android:textColor="@color/text_primary"
         android:layout_marginBottom="12dp" />
@@ -43,10 +44,11 @@
         android:layout_marginBottom="12dp" />
 
     <com.google.android.material.button.MaterialButton
-        android:id="@+id/btnLogin"
+        android:id="@+id/btnSignIn"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="@string/responder_login_button" />
+        android:layout_height="56dp"
+        app:cornerRadius="16dp"
+        android:text="@string/auth_sign_in_button" />
 
     <TextView
         android:id="@+id/textDevOnlyLabel"

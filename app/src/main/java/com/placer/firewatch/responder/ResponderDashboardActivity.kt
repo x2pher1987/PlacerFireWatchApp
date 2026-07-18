@@ -10,6 +10,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.ListenerRegistration
 import com.placer.firewatch.BuildConfig
+import com.placer.firewatch.LandingActivity
 import com.placer.firewatch.R
 import com.placer.firewatch.databinding.ActivityResponderDashboardBinding
 import com.placer.firewatch.report.Incident
@@ -48,6 +49,7 @@ class ResponderDashboardActivity : AppCompatActivity() {
 
         binding.btnLogout.setOnClickListener {
             if (isDevSession) DevResponderSession.end(this) else FirebaseAuth.getInstance().signOut()
+            startActivity(Intent(this, LandingActivity::class.java))
             finish()
         }
 

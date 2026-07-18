@@ -2,11 +2,11 @@ package com.placer.firewatch.report
 
 import android.net.Uri
 import android.util.Log
+import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.DocumentReference
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.storage.FirebaseStorage
-import com.placer.firewatch.auth.AuthManager
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
 import kotlinx.coroutines.suspendCancellableCoroutine
@@ -14,14 +14,16 @@ import kotlinx.coroutines.suspendCancellableCoroutine
 /**
  * Writes one-tap fire reports to Firestore, uploading the attached photo
  * (if any) to Storage first so its download URL can be included in the
- * same document write. The submitter is identified by a Firebase Auth
- * anonymous UID (see AuthManager) rather than any real account.
+ * same document write. The submitter is the currently signed-in
+ * account's UID — every screen that can reach this repository is behind
+ * the app-wide sign-in gate (see LandingActivity), so a signed-in user
+ * is always expected to exist.
  *
  * Requires a real app/google-services.json from your own Firebase project
- * (Anonymous Auth + Firestore + Storage enabled) to actually reach a
- * backend — see the README's "One-tap fire reporting (Firebase setup)"
- * section. The repo ships a placeholder file so the project still
- * compiles and builds without one.
+ * (Firestore + Storage enabled) to actually reach a backend — see the
+ * README's "One-tap fire reporting (Firebase setup)" section. The repo
+ * ships a placeholder file so the project still compiles and builds
+ * without one.
  */
 class FireReportRepository {
 
@@ -36,7 +38,8 @@ class FireReportRepository {
 
     suspend fun submit(draft: FireReportDraft): Result<Unit> {
         return try {
-            val userId = AuthManager.getOrSignInUserId()
+            val userId = FirebaseAuth.getInstance().currentUser?.uid
+                ?: return Result.failure(IllegalStateException("No signed-in user"))
             val docRef = firestore.collection(COLLECTION).document()
             val photoUrl = draft.photoUri?.let { uploadPhoto(docRef.id, it) }
 

@@ -149,28 +149,52 @@ that's a more traditional and often more reliable approach than camera
 vision — tell me your hardware and I can wire up a receiver for it
 instead of, or alongside, the camera path.
 
+## Accounts and roles
+
+The app requires signing in before anything else — **LandingActivity** is
+the launcher, showing **Sign In** / **Create Account**, and nothing past
+it is reachable without a session. Every account has a role stored in
+Firestore at `users/{uid}`:
+
+- **Citizen** — self-registers via **Create Account** (full name, email,
+  password). This is every account's starting role. Citizens land on the
+  reporting home screen (camera preview, **🔥 REPORT FIRE**, etc.).
+- **Responder** — BFP staff who can see and act on the incident feed.
+  There's no self-service way to become one: an admin manually edits an
+  existing citizen's `users/{uid}` doc (see "Create responder accounts"
+  below). Until approved, that account still lands on the citizen home
+  screen like anyone else.
+- **Admin** — full management capabilities (approvals, reports,
+  analytics, barangay management — most of this is still being built).
+  Same manual promotion path as responders.
+
+Firebase Auth sessions persist across app restarts by default, so once
+signed in, a user goes straight to their role's home screen on every
+future launch — **LandingActivity** only shows the sign-in buttons to a
+truly signed-out user. Signing out (available on the responder dashboard
+and the admin placeholder) returns to the landing page.
+
 ## One-tap fire reporting (Firebase setup)
 
-The big red **🔥 REPORT FIRE** button on the home screen is a separate
-reporting path from the SMS alerting described above: it grabs a fresh GPS
-fix, lets you optionally attach a photo and a short note, and on **Send**
-writes a report document to **Firebase Firestore** (with the photo, if
-any, uploaded to **Firebase Storage** first so its download URL can be
-included). Each report includes GPS coordinates, a server timestamp, the
-submitter's Firebase Auth UID, the photo URL (if attached), the note, and
-a `status` field starting as `"Pending"`.
+The big red **🔥 REPORT FIRE** button on the citizen home screen grabs a
+fresh GPS fix, lets you optionally attach a photo and a short note, and
+on **Send** writes a report document to **Firebase Firestore** (with the
+photo, if any, uploaded to **Firebase Storage** first so its download URL
+can be included). Each report includes GPS coordinates, a server
+timestamp, the submitter's Firebase Auth UID, the photo URL (if
+attached), the note, and a `status` field starting as `"Pending"`.
 
 BFP staff see and act on those reports through the **responder
-dashboard**: tap **Responder Login** on the home screen, sign in with an
-email/password account (see "Create responder accounts" below — there's
-no self-registration), and the dashboard shows a live, real-time-updating
-list of incidents — barangay, coordinates, time, reporter, photo, note,
-and status. Tapping **Update Status** on an incident lets a responder set
-it to Accepted, Responding, Arrived, Fire Out, or False Alarm; the change
-is written straight to Firestore and every responder's dashboard updates
-immediately (no refresh needed) because the list is backed by a live
-Firestore listener, not a one-time fetch. The same feed is also available
-as a map (**Map View** on the dashboard) — see "Live Fire Map" below.
+dashboard**, reached automatically after signing in with an approved
+responder account (see "Accounts and roles" above): a live,
+real-time-updating list of incidents — barangay, coordinates, time,
+reporter, photo, note, and status. Tapping **Update Status** on an
+incident lets a responder set it to Accepted, Responding, Arrived, Fire
+Out, or False Alarm; the change is written straight to Firestore and
+every responder's dashboard updates immediately (no refresh needed)
+because the list is backed by a live Firestore listener, not a one-time
+fetch. The same feed is also available as a map (**Map View** on the
+dashboard) — see "Live Fire Map" below.
 
 **This repo ships with a placeholder `app/google-services.json`** — a
 structurally valid file with obviously fake values
@@ -184,9 +208,9 @@ Google account — nobody but you can do this part.
 
 **Want to see the responder dashboard right now, without doing any of
 this first?** Debug builds have a **"Dev Login as Test Responder"**
-button at the bottom of the Responder Login screen — see "Testing the
-responder dashboard without Firebase" further down. It's a completely
-separate, temporary path from everything below.
+button at the bottom of the Sign In screen — see "Testing the responder
+dashboard without Firebase" further down. It's a completely separate,
+temporary path from everything below.
 
 ### 1. Create the project
 
@@ -211,13 +235,10 @@ separate, temporary path from everything below.
 ### 3. Configure Authentication
 
 1. Left sidebar → **Build → Authentication → Get started**.
-2. **Sign-in method** tab → enable **both**:
-   - **Anonymous** — every install signs in anonymously on first use (see
-     `AuthManager.kt`) purely to get a stable UID to tag *reports* with,
-     not a real account.
-   - **Email/Password** — used by the **responder dashboard's login
-     screen**. There's no self-registration; see "Creating responder
-     accounts" below for how you add BFP staff logins.
+2. **Sign-in method** tab → enable **Email/Password**. This is the only
+   provider the app uses now — every account, citizen or responder, signs
+   in the same way via **Sign In** / **Create Account** on the landing
+   page.
 
 ### 4. Configure Firestore
 
@@ -242,38 +263,48 @@ purely as infrastructure for a future push-based alert channel (see
 `ROADMAP.md`, item V2-6). **Build → Messaging** in the console just
 confirms it's active.
 
-### 7. Create responder accounts
+### 7. Create responder and admin accounts
 
-The **"🔥 REPORT FIRE"** flow (reporters) and the **responder dashboard**
-(BFP staff) use different identities on purpose — anyone can submit a
-report anonymously, but only allowlisted accounts can see and manage the
-incident feed. For each responder:
+Anyone can self-register as a citizen via **Create Account** in the app —
+that's the only self-service path. Becoming a responder or admin is a
+manual promotion, on purpose, for an emergency-services tool:
 
-1. **Build → Authentication → Users → Add user** → enter their email and
-   a password. Copy the **User UID** shown after creation.
-2. **Build → Firestore Database → Start collection** (or use an existing
-   one) named `responders` → create a document whose **Document ID is
-   that exact UID** → give it any field, e.g. `role: "responder"` (the
-   content doesn't matter — `firestore.rules` only checks that the
-   document *exists*) → **Save**.
-3. That person can now tap **Responder Login** in the app, sign in with
-   the email/password from step 1, and see the live incident dashboard.
+1. Have the person **Create Account** in the app normally (or create the
+   account yourself via **Build → Authentication → Users → Add user**).
+   Either way, note their **User UID**.
+2. **Build → Firestore Database → `users` collection → find the document
+   with that UID** (it was created automatically at signup with
+   `role: "citizen"`).
+3. Edit that document:
+   - **To make them a responder**: set `role` to `"responder"` and
+     `responderStatus` to `"approved"`. (`"pending"` / `"rejected"` are
+     reserved for a future in-app application flow — for now, only
+     `"approved"` grants dashboard access.)
+   - **To make them an admin**: set `role` to `"admin"`.
+4. They'll land on the responder dashboard or admin screen automatically
+   the next time they sign in (or immediately, if they're already signed
+   in and reopen the app).
 
-There's no in-app way to create or remove responder accounts — this is a
-deliberate, manually-gated allowlist for an emergency-services tool.
+This is also how you set up your own admin account — sign up normally
+through **Create Account**, then promote that same account's `role` to
+`"admin"` via the console. There's no separate seeded admin account;
+whoever runs this project promotes themselves.
 
 ### 8. Lock down security rules
 
 Test mode above is open to anyone who has your API key — fine for initial
 verification, not for real deployment. This repo includes
 [`firestore.rules`](firestore.rules) and [`storage.rules`](storage.rules).
-The Firestore rules require the anonymous-auth UID from step 3 for
-*creating* reports, and require a `responders/{uid}` allowlist entry
-(step 7) to *read the feed or update status* — and even then, a status
-update can only change the `status` field to one of the five responder
-actions, nothing else. Once you've verified writes work (step 9 below),
-paste each file's contents into **Firestore Database → Rules** /
-**Storage → Rules** in the console and **Publish**.
+The Firestore rules let any signed-in user create a `users/{uid}` doc for
+*themselves only*, forced to `role: "citizen"` — self-promotion to
+responder/admin is impossible from the client, only via the console
+(step 7). Creating a fire report requires the signed-in UID to match the
+report's `userId`; reading the feed or updating status requires an
+*approved* responder (checked by reading that same `users/{uid}` doc),
+and even then a status update can only change the `status` field to one
+of the five responder actions, nothing else. Once you've verified writes
+work (step 9 below), paste each file's contents into **Firestore
+Database → Rules** / **Storage → Rules** in the console and **Publish**.
 
 Note: incident photos still display in the dashboard even though
 `storage.rules` says `allow read: if false` — Firebase Storage's
@@ -294,7 +325,7 @@ placeholder.
 ⚠ **Development only.** Until a real Firebase project is wired in (steps
 1–9 above), there's no backend to sign in against or read incidents from.
 To let the dashboard actually be tested anyway, debug builds only show a
-second button on the Responder Login screen: **"Dev Login as Test
+second button on the **Sign In** screen: **"Dev Login as Test
 Responder."** Tapping it:
 
 - Skips Firebase Auth entirely (there's nothing to sign in against yet)
@@ -312,8 +343,8 @@ Responder."** Tapping it:
   hidden here rather than left to open onto a broken/erroring screen).
 
 This is real code living in `app/src/main/java/.../responder/DevResponderSession.kt`,
-`ResponderLoginActivity.kt`, and `ResponderDashboardActivity.kt` — not a
-separate app. Every reference to it is gated behind `BuildConfig.DEBUG`,
+`auth/SignInActivity.kt`, and `responder/ResponderDashboardActivity.kt` —
+not a separate app. Every reference to it is gated behind `BuildConfig.DEBUG`,
 so the button and all dev-mode behavior are **unreachable in a release
 build** (`BuildConfig.DEBUG` is `false` there). That's a safe, genuine
 guarantee for anyone using the app — but it's worth being precise about
@@ -416,10 +447,19 @@ the map screen just won't load tiles until you add one.
 
 ```
 app/src/main/java/com/placer/firewatch/
-├── MainActivity.kt          — camera preview UI, permissions, manual report/call
+├── LandingActivity.kt       — launcher: sign-in gate + role-based routing
+├── MainActivity.kt          — citizen home: camera preview, permissions, manual report/call
 ├── SettingsActivity.kt      — BFP numbers, location label, sensitivity, test alert
 ├── MonitoringService.kt     — foreground service: continuous capture + detection + alerting
 ├── BootReceiver.kt          — resumes monitoring after reboot
+├── admin/
+│   └── AdminHomeActivity.kt — placeholder landing spot for the admin role (full tools: later)
+├── auth/
+│   ├── SignInActivity.kt    — unified email/password sign-in for every role
+│   └── CreateAccountActivity.kt — citizen self-registration
+├── user/
+│   ├── AppUser.kt           — role/responderStatus data model (Firestore users/{uid})
+│   └── UserRepository.kt    — create-on-signup, fetch role for routing
 ├── detection/
 │   ├── Classifier.kt        — shared interface + result types
 │   ├── HeuristicClassifier.kt — zero-setup color-based detector (default)
@@ -427,7 +467,6 @@ app/src/main/java/com/placer/firewatch/
 │   ├── ClassifierFactory.kt — picks whichever is available
 │   └── DetectionTracker.kt  — requires consecutive hits before alerting
 ├── alert/AlertSender.kt     — composes and sends the SMS
-├── auth/AuthManager.kt      — anonymous Firebase Auth sign-in for report attribution
 ├── location/LocationProvider.kt — GPS fix (cached + fresh) via FusedLocationProviderClient
 ├── messaging/FireWatchMessagingService.kt — Cloud Messaging plumbing (no active feature yet)
 ├── notification/NotificationHelper.kt — foreground service notification
@@ -438,7 +477,6 @@ app/src/main/java/com/placer/firewatch/
 │   ├── Incident.kt          — Firestore-mapped read model for the dashboard
 │   └── IncidentRepository.kt — live incident listener + status updates
 ├── responder/
-│   ├── ResponderLoginActivity.kt — email/password login for BFP staff
 │   ├── ResponderDashboardActivity.kt — live incident list, logout, map entry point
 │   ├── IncidentAdapter.kt   — RecyclerView list + per-incident status action menu
 │   ├── IncidentDetailsView.kt — incident binding + status menu, shared by list and map

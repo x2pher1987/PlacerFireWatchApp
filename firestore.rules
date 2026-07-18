@@ -1,15 +1,35 @@
 rules_version = '2';
 
-// Fire report writes require anonymous auth (see AuthManager.kt) and must
-// self-report the same UID the client authenticated as. Reads and status
-// updates are restricted to accounts allowlisted in responders/{uid} — see
-// the README's responder setup section for how those get created.
+// Every account has a users/{uid} doc holding its role. Anyone can
+// self-register (role forced to "citizen" at creation); becoming a
+// responder or admin means an out-of-band edit to that same doc by the
+// project admin via the Firebase console — see the README's "Create
+// responder accounts" section. Fire report writes require the signed-in
+// UID to match the report's userId; reads/status-updates require an
+// *approved* responder (or, later, an admin).
 service cloud.firestore {
   match /databases/{database}/documents {
 
-    function isResponder() {
+    function currentUserDoc() {
+      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data;
+    }
+
+    function isApprovedResponder() {
       return request.auth != null
-        && exists(/databases/$(database)/documents/responders/$(request.auth.uid));
+        && exists(/databases/$(database)/documents/users/$(request.auth.uid))
+        && currentUserDoc().role == 'responder'
+        && currentUserDoc().responderStatus == 'approved';
+    }
+
+    match /users/{uid} {
+      allow read: if request.auth != null && request.auth.uid == uid;
+      allow create: if request.auth != null && request.auth.uid == uid
+        && request.resource.data.role == 'citizen'
+        && request.resource.data.keys().hasOnly(
+             ['fullName', 'email', 'role', 'responderStatus', 'suspended', 'createdAt']
+           );
+      allow update: if false;
+      allow delete: if false;
     }
 
     match /fire_reports/{reportId} {
@@ -19,20 +39,12 @@ service cloud.firestore {
         && request.resource.data.keys().hasOnly(
              ['latitude', 'longitude', 'timestamp', 'userId', 'photoUrl', 'note', 'status', 'barangay']
            );
-      allow read: if isResponder();
-      allow update: if isResponder()
+      allow read: if isApprovedResponder();
+      allow update: if isApprovedResponder()
         && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status'])
         && request.resource.data.status in
              ['Accepted', 'Responding', 'Arrived', 'Fire Out', 'False Alarm'];
       allow delete: if false;
-    }
-
-    // Responder allowlist. Documents here are created manually by the
-    // project admin (Firebase console), never by the app itself — clients
-    // can only read their own entry, to check "am I a responder".
-    match /responders/{uid} {
-      allow read: if request.auth != null && request.auth.uid == uid;
-      allow write: if false;
     }
   }
 }

@@ -17,6 +17,7 @@ import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
 import androidx.lifecycle.lifecycleScope
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.google.firebase.auth.FirebaseAuth
 import com.placer.firewatch.alert.AlertSender
 import com.placer.firewatch.databinding.ActivityMainBinding
 import com.placer.firewatch.databinding.DialogReportFireBinding
@@ -24,7 +25,6 @@ import com.placer.firewatch.detection.AlertTrigger
 import com.placer.firewatch.location.LocationProvider
 import com.placer.firewatch.report.FireReportDraft
 import com.placer.firewatch.report.FireReportRepository
-import com.placer.firewatch.responder.ResponderLoginActivity
 import com.placer.firewatch.util.Prefs
 import java.io.File
 import kotlinx.coroutines.launch
@@ -86,6 +86,16 @@ class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        // Defensive: this screen should only ever be reached through
+        // LandingActivity's sign-in gate. Bounce back if that's somehow
+        // not the case (e.g. a stale task stack).
+        if (FirebaseAuth.getInstance().currentUser == null) {
+            startActivity(Intent(this, LandingActivity::class.java))
+            finish()
+            return
+        }
+
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
@@ -98,9 +108,6 @@ class MainActivity : AppCompatActivity() {
         binding.btnCallBfp.setOnClickListener { callBfp() }
         binding.btnSettings.setOnClickListener {
             startActivity(Intent(this, SettingsActivity::class.java))
-        }
-        binding.linkResponderLogin.setOnClickListener {
-            startActivity(Intent(this, ResponderLoginActivity::class.java))
         }
 
         requestNeededPermissions()
