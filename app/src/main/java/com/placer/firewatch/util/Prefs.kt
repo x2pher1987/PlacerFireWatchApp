@@ -20,7 +20,10 @@ object Prefs {
     private const val KEY_MONITORING_ENABLED = "monitoring_enabled"
 
     private const val DEFAULT_NUMBERS = "911"
-    private const val DEFAULT_LOCATION_LABEL = "Placer, Masbate"
+
+    // Must be one of Barangays.ALL (see barangay/Barangays.kt) — Settings and
+    // Responder Registration both select from that fixed list now, not free text.
+    private const val DEFAULT_LOCATION_LABEL = "Poblacion"
     private const val DEFAULT_SENSITIVITY = 50
 
     private fun prefs(context: Context) =
