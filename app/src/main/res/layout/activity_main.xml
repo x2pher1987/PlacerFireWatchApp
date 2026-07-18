@@ -36,28 +36,36 @@
         app:layout_constraintBottom_toBottomOf="parent">
 
         <com.google.android.material.button.MaterialButton
-            android:id="@+id/btnOneTapReport"
+            android:id="@+id/btnReportFireNow"
             android:layout_width="match_parent"
-            android:layout_height="96dp"
+            android:layout_height="80dp"
             android:backgroundTint="@color/fire_red"
-            android:text="@string/report_fire_one_tap"
-            android:textSize="24sp"
+            android:text="@string/report_fire_now_button"
+            android:textSize="20sp"
             android:textStyle="bold"
-            android:layout_marginBottom="12dp" />
+            android:layout_marginBottom="10dp" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnReportSmoke"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:backgroundTint="@color/smoke_gray"
+            android:text="@string/report_smoke_button"
+            android:layout_marginBottom="8dp" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnReportSuspectedFire"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:backgroundTint="@color/fire_orange"
+            android:text="@string/report_suspected_fire_button"
+            android:layout_marginBottom="8dp" />
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btnToggleMonitoring"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="@string/start_monitoring"
-            android:layout_marginBottom="8dp" />
-
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/btnReportFire"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:backgroundTint="@color/fire_red"
-            android:text="@string/report_fire_now"
             android:layout_marginBottom="8dp" />
 
         <com.google.android.material.button.MaterialButton

@@ -18,13 +18,12 @@ import androidx.core.content.FileProvider
 import androidx.lifecycle.lifecycleScope
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.firebase.auth.FirebaseAuth
-import com.placer.firewatch.alert.AlertSender
 import com.placer.firewatch.databinding.ActivityMainBinding
 import com.placer.firewatch.databinding.DialogReportFireBinding
-import com.placer.firewatch.detection.AlertTrigger
 import com.placer.firewatch.location.LocationProvider
 import com.placer.firewatch.report.FireReportDraft
 import com.placer.firewatch.report.FireReportRepository
+import com.placer.firewatch.report.ReportType
 import com.placer.firewatch.responder.apply.ResponderApplicationActivity
 import com.placer.firewatch.util.Prefs
 import java.io.File
@@ -61,11 +60,13 @@ class MainActivity : AppCompatActivity() {
     private var pendingPhotoUri: Uri? = null
     private var attachedPhotoUri: Uri? = null
 
+    private var pendingReportType: String = ReportType.FIRE
+
     private val reportLocationPermissionLauncher = registerForActivityResult(
         ActivityResultContracts.RequestPermission()
     ) { granted ->
         if (granted) {
-            beginFireReportFlow()
+            beginFireReportFlow(pendingReportType)
         } else {
             Toast.makeText(this, R.string.report_location_permission_required, Toast.LENGTH_LONG).show()
         }
@@ -103,9 +104,10 @@ class MainActivity : AppCompatActivity() {
         monitoringActive = Prefs.isMonitoringEnabled(this)
         updateToggleButtonLabel()
 
-        binding.btnOneTapReport.setOnClickListener { onReportFireTapped() }
+        binding.btnReportFireNow.setOnClickListener { onReportTapped(ReportType.FIRE) }
+        binding.btnReportSmoke.setOnClickListener { onReportTapped(ReportType.SMOKE) }
+        binding.btnReportSuspectedFire.setOnClickListener { onReportTapped(ReportType.SUSPECTED_FIRE) }
         binding.btnToggleMonitoring.setOnClickListener { toggleMonitoring() }
-        binding.btnReportFire.setOnClickListener { sendManualReport() }
         binding.btnCallBfp.setOnClickListener { callBfp() }
         binding.linkApplyResponder.setOnClickListener {
             startActivity(Intent(this, ResponderApplicationActivity::class.java))
@@ -172,58 +174,37 @@ class MainActivity : AppCompatActivity() {
         )
     }
 
-    private fun sendManualReport() {
-        lifecycleScope.launch {
-            val location = LocationProvider(this@MainActivity).getLastKnownLocation()
-            val sender = AlertSender(this@MainActivity)
-            val message = sender.buildMessage(
-                AlertTrigger.FIRE,
-                Prefs.getLocationLabel(this@MainActivity),
-                location?.latitude,
-                location?.longitude
-            ).replace(
-                "Automated alert from an unattended camera sensor",
-                "Manual report from a resident"
-            )
-            val sent = sender.sendSms(Prefs.getBfpNumbers(this@MainActivity), message)
-            binding.statusText.text = if (sent) {
-                getString(R.string.status_alert_sent)
-            } else {
-                "Failed to send — check SMS permission and signal"
-            }
-        }
-    }
-
     private fun callBfp() {
         val number = Prefs.getBfpNumbers(this).firstOrNull() ?: "911"
         startActivity(Intent(Intent.ACTION_DIAL, Uri.parse("tel:$number")))
     }
 
-    private fun onReportFireTapped() {
+    private fun onReportTapped(type: String) {
+        pendingReportType = type
         val hasLocationPermission = ContextCompat.checkSelfPermission(
             this, Manifest.permission.ACCESS_FINE_LOCATION
         ) == PackageManager.PERMISSION_GRANTED
 
         if (hasLocationPermission) {
-            beginFireReportFlow()
+            beginFireReportFlow(type)
         } else {
             reportLocationPermissionLauncher.launch(Manifest.permission.ACCESS_FINE_LOCATION)
         }
     }
 
-    private fun beginFireReportFlow() {
+    private fun beginFireReportFlow(type: String) {
         Toast.makeText(this, R.string.report_getting_location, Toast.LENGTH_SHORT).show()
         lifecycleScope.launch {
             val location = LocationProvider(this@MainActivity).getCurrentLocation()
             if (location == null) {
                 Toast.makeText(this@MainActivity, R.string.report_location_failed, Toast.LENGTH_LONG).show()
             } else {
-                showReportConfirmationDialog(location.latitude, location.longitude)
+                showReportConfirmationDialog(type, location.latitude, location.longitude)
             }
         }
     }
 
-    private fun showReportConfirmationDialog(latitude: Double, longitude: Double) {
+    private fun showReportConfirmationDialog(type: String, latitude: Double, longitude: Double) {
         attachedPhotoUri = null
         val dialogBinding = DialogReportFireBinding.inflate(layoutInflater)
         reportDialogBinding = dialogBinding
@@ -237,11 +218,11 @@ class MainActivity : AppCompatActivity() {
         }
 
         MaterialAlertDialogBuilder(this)
-            .setTitle(R.string.report_confirm_title)
+            .setTitle(getString(R.string.report_confirm_title, type))
             .setView(dialogBinding.root)
             .setPositiveButton(R.string.report_send) { _, _ ->
                 val note = dialogBinding.editReportNote.text?.toString()?.trim().orEmpty()
-                submitFireReport(latitude, longitude, note, attachedPhotoUri)
+                submitFireReport(type, latitude, longitude, note, attachedPhotoUri)
             }
             .setNegativeButton(R.string.report_cancel, null)
             .setOnDismissListener { reportDialogBinding = null }
@@ -254,10 +235,10 @@ class MainActivity : AppCompatActivity() {
         return FileProvider.getUriForFile(this, "$packageName.fileprovider", photoFile)
     }
 
-    private fun submitFireReport(latitude: Double, longitude: Double, note: String, photoUri: Uri?) {
+    private fun submitFireReport(type: String, latitude: Double, longitude: Double, note: String, photoUri: Uri?) {
         Toast.makeText(this, R.string.report_submitting, Toast.LENGTH_SHORT).show()
         lifecycleScope.launch {
-            val draft = FireReportDraft(latitude, longitude, note, photoUri, Prefs.getLocationLabel(this@MainActivity))
+            val draft = FireReportDraft(latitude, longitude, note, photoUri, Prefs.getLocationLabel(this@MainActivity), type)
             val result = FireReportRepository().submit(draft)
             val messageRes = if (result.isSuccess) {
                 R.string.report_submitted_success

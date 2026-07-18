@@ -51,7 +51,8 @@ class FireReportRepository {
                 "photoUrl" to photoUrl,
                 "note" to draft.note.ifBlank { null },
                 "status" to ReportStatus.PENDING,
-                "barangay" to draft.barangay
+                "barangay" to draft.barangay,
+                "type" to draft.type
             )
 
             setDocument(docRef, data)

@@ -64,7 +64,7 @@ service cloud.firestore {
         && request.resource.data.userId == request.auth.uid
         && request.resource.data.status == "Pending"
         && request.resource.data.keys().hasOnly(
-             ['latitude', 'longitude', 'timestamp', 'userId', 'photoUrl', 'note', 'status', 'barangay']
+             ['latitude', 'longitude', 'timestamp', 'userId', 'photoUrl', 'note', 'status', 'barangay', 'type']
            );
       allow read: if isApprovedResponder() || isAdmin();
       allow update: if (isApprovedResponder() || isAdmin())

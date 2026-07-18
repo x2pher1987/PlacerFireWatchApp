@@ -17,5 +17,8 @@ data class Incident(
     val photoUrl: String? = null,
     val note: String? = null,
     val status: String = ReportStatus.PENDING,
-    val barangay: String? = null
+    val barangay: String? = null,
+    // Defaults to Fire for reports submitted before Section 6 added report
+    // types — those documents genuinely have no "type" field in Firestore.
+    val type: String = ReportType.FIRE
 )
