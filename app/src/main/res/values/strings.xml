@@ -80,6 +80,12 @@
     <string name="admin_bfp_number_hint">e.g. 0917xxxxxxx or 911</string>
     <string name="admin_save">Save</string>
     <string name="admin_bfp_number_saved">BFP number saved.</string>
+    <string name="admin_export_xlsx">Export .xlsx</string>
+    <string name="admin_export_docx">Export .docx</string>
+    <string name="admin_export_no_reports">There are no reports to export yet.</string>
+    <string name="admin_export_in_progress">Preparing export…</string>
+    <string name="admin_export_success">Reports exported.</string>
+    <string name="admin_export_failed">Could not export reports: %1$s</string>
 
     <!-- Responder registration (Section 3) -->
     <string name="apply_link">Apply to Become a Responder</string>

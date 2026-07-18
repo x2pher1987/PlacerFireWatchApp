@@ -100,9 +100,39 @@
         android:clipToPadding="false"
         android:padding="4dp"
         app:layout_constraintTop_toBottomOf="@id/textPendingApplicationsTitle"
-        app:layout_constraintBottom_toTopOf="@id/textAdminPlaceholder"
+        app:layout_constraintBottom_toTopOf="@id/rowExportReports"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
+
+    <LinearLayout
+        android:id="@+id/rowExportReports"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:paddingHorizontal="16dp"
+        android:paddingTop="8dp"
+        app:layout_constraintTop_toBottomOf="@id/recyclerApplications"
+        app:layout_constraintBottom_toTopOf="@id/textAdminPlaceholder">
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnExportXlsx"
+            style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:layout_marginEnd="4dp"
+            android:text="@string/admin_export_xlsx" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnExportDocx"
+            style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:layout_marginStart="4dp"
+            android:text="@string/admin_export_docx" />
+
+    </LinearLayout>
 
     <TextView
         android:id="@+id/textAdminPlaceholder"
