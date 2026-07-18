@@ -117,6 +117,10 @@
     <string name="responder_update_status">Update Status</string>
     <string name="responder_photo_description">Incident photo</string>
     <string name="responder_get_directions">🧭 Get Directions</string>
+    <string name="responder_filter_all">All</string>
+    <string name="responder_filter_pending">Pending</string>
+    <string name="responder_filter_active">Active</string>
+    <string name="responder_filter_resolved">Resolved</string>
 
     <!-- Live Fire Map -->
     <string name="responder_map_title">Live Fire Map</string>

@@ -31,12 +31,16 @@ import kotlinx.coroutines.launch
  */
 class ResponderDashboardActivity : AppCompatActivity() {
 
+    /** Client-side grouping over [ReportStatus] — no separate Firestore query per filter. */
+    private enum class Filter { ALL, PENDING, ACTIVE, RESOLVED }
+
     private lateinit var binding: ActivityResponderDashboardBinding
     private val repository = IncidentRepository()
     private var listenerRegistration: ListenerRegistration? = null
     private lateinit var adapter: IncidentAdapter
     private var isDevSession = false
-    private var devIncidents: List<Incident> = emptyList()
+    private var allIncidents: List<Incident> = emptyList()
+    private var currentFilter: Filter = Filter.ALL
     private var knownIncidentIds: Set<String>? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -56,6 +60,16 @@ class ResponderDashboardActivity : AppCompatActivity() {
             finish()
         }
 
+        binding.chipGroupFilter.setOnCheckedStateChangeListener { _, checkedIds ->
+            currentFilter = when (checkedIds.firstOrNull()) {
+                R.id.chipFilterPending -> Filter.PENDING
+                R.id.chipFilterActive -> Filter.ACTIVE
+                R.id.chipFilterResolved -> Filter.RESOLVED
+                else -> Filter.ALL
+            }
+            renderFilteredList()
+        }
+
         if (isDevSession) {
             binding.textDevModeBanner.visibility = View.VISIBLE
             // The map isn't wired to show sample data, only live Firestore —
@@ -71,15 +85,14 @@ class ResponderDashboardActivity : AppCompatActivity() {
     override fun onStart() {
         super.onStart()
         if (isDevSession) {
-            devIncidents = DevResponderSession.sampleIncidents()
-            adapter.submitList(devIncidents)
-            binding.textEmpty.visibility = if (devIncidents.isEmpty()) View.VISIBLE else View.GONE
+            allIncidents = DevResponderSession.sampleIncidents()
+            renderFilteredList()
             return
         }
         listenerRegistration = repository.listenForIncidents(
             onUpdate = { incidents ->
-                adapter.submitList(incidents)
-                binding.textEmpty.visibility = if (incidents.isEmpty()) View.VISIBLE else View.GONE
+                allIncidents = incidents
+                renderFilteredList()
                 alertOnNewIncidents(incidents)
             },
             onError = { e ->
@@ -97,6 +110,19 @@ class ResponderDashboardActivity : AppCompatActivity() {
         listenerRegistration?.remove()
         listenerRegistration = null
         knownIncidentIds = null
+    }
+
+    private fun renderFilteredList() {
+        val filtered = allIncidents.filter { matchesFilter(it.status, currentFilter) }
+        adapter.submitList(filtered)
+        binding.textEmpty.visibility = if (filtered.isEmpty()) View.VISIBLE else View.GONE
+    }
+
+    private fun matchesFilter(status: String, filter: Filter): Boolean = when (filter) {
+        Filter.ALL -> true
+        Filter.PENDING -> status == ReportStatus.PENDING
+        Filter.ACTIVE -> status in setOf(ReportStatus.ACCEPTED, ReportStatus.RESPONDING, ReportStatus.ARRIVED)
+        Filter.RESOLVED -> status in setOf(ReportStatus.FIRE_OUT, ReportStatus.FALSE_ALARM)
     }
 
     /**
@@ -117,8 +143,8 @@ class ResponderDashboardActivity : AppCompatActivity() {
     private fun updateIncidentStatus(reportId: String, newStatus: String) {
         ResponderAlertNotifier.acknowledge(this, reportId)
         if (isDevSession) {
-            devIncidents = devIncidents.map { if (it.id == reportId) it.copy(status = newStatus) else it }
-            adapter.submitList(devIncidents)
+            allIncidents = allIncidents.map { if (it.id == reportId) it.copy(status = newStatus) else it }
+            renderFilteredList()
             return
         }
         lifecycleScope.launch {
