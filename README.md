@@ -182,6 +182,12 @@ will fail to submit (you'll see the "could not submit" toast) until you
 create a real Firebase project and swap it in. This requires your own
 Google account — nobody but you can do this part.
 
+**Want to see the responder dashboard right now, without doing any of
+this first?** Debug builds have a **"Dev Login as Test Responder"**
+button at the bottom of the Responder Login screen — see "Testing the
+responder dashboard without Firebase" further down. It's a completely
+separate, temporary path from everything below.
+
 ### 1. Create the project
 
 1. Go to the [Firebase console](https://console.firebase.google.com/) and
@@ -282,6 +288,45 @@ Replace `app/google-services.json` in this repo with the file you
 downloaded in step 2, rebuild, and the app writes real report
 documents/photos to your project instead of failing against the
 placeholder.
+
+## Testing the responder dashboard without Firebase
+
+⚠ **Development only.** Until a real Firebase project is wired in (steps
+1–9 above), there's no backend to sign in against or read incidents from.
+To let the dashboard actually be tested anyway, debug builds only show a
+second button on the Responder Login screen: **"Dev Login as Test
+Responder."** Tapping it:
+
+- Skips Firebase Auth entirely (there's nothing to sign in against yet)
+  and starts a session flag stored locally on the device instead.
+- Opens the dashboard showing **3 hardcoded sample incidents** (one
+  Pending, one Responding, one Fire Out — used here as the "resolved"
+  example, matching the same status-bucketing the Live Fire Map's green
+  marker uses) instead of a live Firestore listener.
+- Lets you exercise **Update Status** on those samples — updates apply to
+  the in-memory sample list, not Firestore, so they don't persist and
+  don't affect anyone else.
+- Shows a persistent **"⚠ DEVELOPMENT MODE"** banner on the dashboard the
+  whole time, and hides the **Map View** button (the map isn't wired to
+  show sample data — it only knows how to read live Firestore, so it's
+  hidden here rather than left to open onto a broken/erroring screen).
+
+This is real code living in `app/src/main/java/.../responder/DevResponderSession.kt`,
+`ResponderLoginActivity.kt`, and `ResponderDashboardActivity.kt` — not a
+separate app. Every reference to it is gated behind `BuildConfig.DEBUG`,
+so the button and all dev-mode behavior are **unreachable in a release
+build** (`BuildConfig.DEBUG` is `false` there). That's a safe, genuine
+guarantee for anyone using the app — but it's worth being precise about
+what it does and doesn't mean: with `isMinifyEnabled = false` (the
+current release config), the dead code technically still ships inside
+the release APK's bytecode, just unreachable through the UI. Before any
+real production/Play-adjacent release, either delete `DevResponderSession.kt`
+and its call sites outright, or turn on R8 minification
+(`isMinifyEnabled = true`) so unreachable branches get stripped for real.
+
+Once a real Firebase project exists, this dev path and the real
+email/password login coexist on the same screen without conflicting —
+use whichever one fits what you're testing.
 
 ## Live Fire Map (Google Maps setup)
 
@@ -397,7 +442,8 @@ app/src/main/java/com/placer/firewatch/
 │   ├── ResponderDashboardActivity.kt — live incident list, logout, map entry point
 │   ├── IncidentAdapter.kt   — RecyclerView list + per-incident status action menu
 │   ├── IncidentDetailsView.kt — incident binding + status menu, shared by list and map
-│   └── LiveFireMapActivity.kt — colored real-time markers, tap for incident details
+│   ├── LiveFireMapActivity.kt — colored real-time markers, tap for incident details
+│   └── DevResponderSession.kt — ⚠ DEVELOPMENT ONLY: debug-only login bypass + sample data
 └── util/                    — SharedPreferences wrapper, image conversion
 ```
 

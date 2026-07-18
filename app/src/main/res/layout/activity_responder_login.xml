@@ -48,4 +48,25 @@
         android:layout_height="wrap_content"
         android:text="@string/responder_login_button" />
 
+    <TextView
+        android:id="@+id/textDevOnlyLabel"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/responder_dev_only_label"
+        android:textColor="@color/fire_orange"
+        android:textStyle="bold"
+        android:textSize="12sp"
+        android:gravity="center"
+        android:layout_marginTop="32dp"
+        android:visibility="gone" />
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btnDevLogin"
+        style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/responder_dev_login_button"
+        android:layout_marginTop="8dp"
+        android:visibility="gone" />
+
 </LinearLayout>

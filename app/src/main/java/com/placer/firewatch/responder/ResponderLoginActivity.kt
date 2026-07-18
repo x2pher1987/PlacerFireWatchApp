@@ -5,6 +5,7 @@ import android.os.Bundle
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import com.google.firebase.auth.FirebaseAuth
+import com.placer.firewatch.BuildConfig
 import com.placer.firewatch.R
 import com.placer.firewatch.databinding.ActivityResponderLoginBinding
 
@@ -19,10 +20,25 @@ class ResponderLoginActivity : AppCompatActivity() {
         setContentView(binding.root)
 
         binding.btnLogin.setOnClickListener { attemptLogin() }
+
+        // ⚠ DEVELOPMENT ONLY — see DevResponderSession. Never shown in a
+        // release build: BuildConfig.DEBUG is false there.
+        if (BuildConfig.DEBUG) {
+            binding.textDevOnlyLabel.visibility = View.VISIBLE
+            binding.btnDevLogin.visibility = View.VISIBLE
+            binding.btnDevLogin.setOnClickListener {
+                DevResponderSession.start(this)
+                openDashboard()
+            }
+        }
     }
 
     override fun onStart() {
         super.onStart()
+        if (BuildConfig.DEBUG && DevResponderSession.isActive(this)) {
+            openDashboard()
+            return
+        }
         // Anonymous sessions (from the one-tap reporter flow) don't count as
         // a responder being logged in — only a real email/password account does.
         val currentUser = auth.currentUser

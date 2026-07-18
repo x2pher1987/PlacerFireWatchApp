@@ -47,6 +47,9 @@ android {
 
     buildFeatures {
         viewBinding = true
+        // Needed for BuildConfig.DEBUG, which gates the development-only
+        // responder login — see ResponderLoginActivity / DevResponderSession.
+        buildConfig = true
     }
 }
 

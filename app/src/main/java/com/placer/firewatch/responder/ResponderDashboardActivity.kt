@@ -9,6 +9,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.ListenerRegistration
+import com.placer.firewatch.BuildConfig
 import com.placer.firewatch.R
 import com.placer.firewatch.databinding.ActivityResponderDashboardBinding
 import com.placer.firewatch.report.Incident
@@ -20,6 +21,10 @@ import kotlinx.coroutines.launch
  * account's UID to have a matching responders/{uid} document in Firestore
  * — see the README's responder setup section — otherwise the listener
  * below surfaces a permission-denied error.
+ *
+ * Exception: a ⚠ DEVELOPMENT ONLY session (see DevResponderSession) skips
+ * Firestore entirely and shows 3 hardcoded sample incidents instead, for
+ * testing this screen before a real Firebase project exists.
  */
 class ResponderDashboardActivity : AppCompatActivity() {
 
@@ -27,27 +32,45 @@ class ResponderDashboardActivity : AppCompatActivity() {
     private val repository = IncidentRepository()
     private var listenerRegistration: ListenerRegistration? = null
     private lateinit var adapter: IncidentAdapter
+    private var isDevSession = false
+    private var devIncidents: List<Incident> = emptyList()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityResponderDashboardBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        isDevSession = BuildConfig.DEBUG && DevResponderSession.isActive(this)
+
         adapter = IncidentAdapter { incident, newStatus -> updateIncidentStatus(incident.id, newStatus) }
         binding.recyclerIncidents.layoutManager = LinearLayoutManager(this)
         binding.recyclerIncidents.adapter = adapter
 
         binding.btnLogout.setOnClickListener {
-            FirebaseAuth.getInstance().signOut()
+            if (isDevSession) DevResponderSession.end(this) else FirebaseAuth.getInstance().signOut()
             finish()
         }
-        binding.btnMapView.setOnClickListener {
-            startActivity(Intent(this, LiveFireMapActivity::class.java))
+
+        if (isDevSession) {
+            binding.textDevModeBanner.visibility = View.VISIBLE
+            // The map isn't wired to show sample data, only live Firestore —
+            // hide it here rather than let it open to a broken/erroring screen.
+            binding.btnMapView.visibility = View.GONE
+        } else {
+            binding.btnMapView.setOnClickListener {
+                startActivity(Intent(this, LiveFireMapActivity::class.java))
+            }
         }
     }
 
     override fun onStart() {
         super.onStart()
+        if (isDevSession) {
+            devIncidents = DevResponderSession.sampleIncidents()
+            adapter.submitList(devIncidents)
+            binding.textEmpty.visibility = if (devIncidents.isEmpty()) View.VISIBLE else View.GONE
+            return
+        }
         listenerRegistration = repository.listenForIncidents(
             onUpdate = { incidents ->
                 adapter.submitList(incidents)
@@ -70,6 +93,11 @@ class ResponderDashboardActivity : AppCompatActivity() {
     }
 
     private fun updateIncidentStatus(reportId: String, newStatus: String) {
+        if (isDevSession) {
+            devIncidents = devIncidents.map { if (it.id == reportId) it.copy(status = newStatus) else it }
+            adapter.submitList(devIncidents)
+            return
+        }
         lifecycleScope.launch {
             val result = repository.updateStatus(reportId, newStatus)
             if (result.isFailure) {

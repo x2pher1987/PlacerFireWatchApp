@@ -53,4 +53,9 @@
     <string name="responder_map_title">Live Fire Map</string>
     <string name="responder_map_view">Map View</string>
     <string name="responder_dialog_close">Close</string>
+
+    <!-- Development-only responder login (debug builds only, see DevResponderSession) -->
+    <string name="responder_dev_only_label">⚠ DEVELOPMENT ONLY — bypasses Firebase, shows sample data</string>
+    <string name="responder_dev_login_button">Dev Login as Test Responder</string>
+    <string name="responder_dev_mode_banner">⚠ DEVELOPMENT MODE — showing sample data, not live Firestore</string>
 </resources>
