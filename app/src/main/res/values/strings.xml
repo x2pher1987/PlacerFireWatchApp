@@ -54,6 +54,10 @@
     <string name="admin_reject">Reject</string>
     <string name="admin_action_failed">Could not update this application. Try again.</string>
     <string name="admin_view_document">View</string>
+    <string name="admin_bfp_number_label">BFP Emergency Call Number</string>
+    <string name="admin_bfp_number_hint">e.g. 0917xxxxxxx or 911</string>
+    <string name="admin_save">Save</string>
+    <string name="admin_bfp_number_saved">BFP number saved.</string>
 
     <!-- Responder registration (Section 3) -->
     <string name="apply_link">Apply to Become a Responder</string>

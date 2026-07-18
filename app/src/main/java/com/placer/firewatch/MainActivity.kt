@@ -25,6 +25,7 @@ import com.placer.firewatch.report.FireReportDraft
 import com.placer.firewatch.report.FireReportRepository
 import com.placer.firewatch.report.ReportType
 import com.placer.firewatch.responder.apply.ResponderApplicationActivity
+import com.placer.firewatch.settings.AppSettingsRepository
 import com.placer.firewatch.util.Prefs
 import java.io.File
 import kotlinx.coroutines.launch
@@ -61,6 +62,7 @@ class MainActivity : AppCompatActivity() {
     private var attachedPhotoUri: Uri? = null
 
     private var pendingReportType: String = ReportType.FIRE
+    private var cachedBfpNumber: String? = null
 
     private val reportLocationPermissionLauncher = registerForActivityResult(
         ActivityResultContracts.RequestPermission()
@@ -115,6 +117,8 @@ class MainActivity : AppCompatActivity() {
         binding.btnSettings.setOnClickListener {
             startActivity(Intent(this, SettingsActivity::class.java))
         }
+
+        lifecycleScope.launch { cachedBfpNumber = AppSettingsRepository().getBfpNumber() }
 
         requestNeededPermissions()
     }
@@ -175,7 +179,12 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun callBfp() {
-        val number = Prefs.getBfpNumbers(this).firstOrNull() ?: "911"
+        // Admin-configured number (Section 10) takes priority; falls back to
+        // this device's local Settings number if it hasn't loaded yet (or
+        // no admin has set one), same as before this feature existed.
+        val number = cachedBfpNumber?.takeIf { it.isNotBlank() }
+            ?: Prefs.getBfpNumbers(this).firstOrNull()
+            ?: "911"
         startActivity(Intent(Intent.ACTION_DIAL, Uri.parse("tel:$number")))
     }
 

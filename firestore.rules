@@ -59,6 +59,13 @@ service cloud.firestore {
       allow delete: if false;
     }
 
+    // Single app-wide settings doc (currently just the BFP call number,
+    // Section 10) — any signed-in user can read it, only an admin can set it.
+    match /app_settings/{document} {
+      allow read: if request.auth != null;
+      allow write: if isAdmin();
+    }
+
     match /fire_reports/{reportId} {
       allow create: if request.auth != null
         && request.resource.data.userId == request.auth.uid

@@ -13,6 +13,7 @@ import com.placer.firewatch.LandingActivity
 import com.placer.firewatch.R
 import com.placer.firewatch.databinding.ActivityAdminHomeBinding
 import com.placer.firewatch.responder.apply.ResponderApplication
+import com.placer.firewatch.settings.AppSettingsRepository
 import kotlinx.coroutines.launch
 
 /**
@@ -25,6 +26,7 @@ class AdminHomeActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityAdminHomeBinding
     private val repository = AdminApplicationRepository()
+    private val settingsRepository = AppSettingsRepository()
     private var listenerRegistration: ListenerRegistration? = null
     private lateinit var adapter: ResponderApplicationAdapter
 
@@ -44,6 +46,21 @@ class AdminHomeActivity : AppCompatActivity() {
             FirebaseAuth.getInstance().signOut()
             startActivity(Intent(this, LandingActivity::class.java))
             finish()
+        }
+
+        binding.btnSaveBfpNumber.setOnClickListener { saveBfpNumber() }
+        lifecycleScope.launch {
+            binding.editBfpNumber.setText(settingsRepository.getBfpNumber().orEmpty())
+        }
+    }
+
+    private fun saveBfpNumber() {
+        val number = binding.editBfpNumber.text?.toString()?.trim().orEmpty()
+        if (number.isEmpty()) return
+        lifecycleScope.launch {
+            val result = settingsRepository.setBfpNumber(number)
+            val messageRes = if (result.isSuccess) R.string.admin_bfp_number_saved else R.string.admin_action_failed
+            Toast.makeText(this@AdminHomeActivity, messageRes, Toast.LENGTH_SHORT).show()
         }
     }
 
