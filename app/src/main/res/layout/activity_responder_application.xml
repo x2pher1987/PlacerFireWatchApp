@@ -1,0 +1,200 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/background_dark">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="20dp">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/apply_title"
+            android:textColor="@color/text_primary"
+            android:textStyle="bold"
+            android:textSize="20sp"
+            android:layout_marginBottom="4dp" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/apply_intro"
+            android:textColor="@color/text_secondary"
+            android:textSize="12sp"
+            android:layout_marginBottom="16dp" />
+
+        <EditText
+            android:id="@+id/editFullName"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="@string/apply_full_name_hint"
+            android:inputType="textPersonName|textCapWords"
+            android:textColor="@color/text_primary"
+            android:layout_marginBottom="12dp" />
+
+        <EditText
+            android:id="@+id/editBirthdate"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="@string/apply_birthdate_hint"
+            android:focusable="false"
+            android:clickable="true"
+            android:textColor="@color/text_primary"
+            android:layout_marginBottom="12dp" />
+
+        <EditText
+            android:id="@+id/editAddress"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="@string/apply_address_hint"
+            android:inputType="textMultiLine|textCapSentences"
+            android:minLines="2"
+            android:textColor="@color/text_primary"
+            android:layout_marginBottom="12dp" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/apply_barangay_label"
+            android:textColor="@color/text_primary"
+            android:textStyle="bold"
+            android:layout_marginBottom="4dp" />
+
+        <Spinner
+            android:id="@+id/spinnerBarangay"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="12dp" />
+
+        <EditText
+            android:id="@+id/editContactNumber"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="@string/apply_contact_number_hint"
+            android:inputType="phone"
+            android:textColor="@color/text_primary"
+            android:layout_marginBottom="12dp" />
+
+        <EditText
+            android:id="@+id/editEmail"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="@string/auth_email_hint"
+            android:inputType="textEmailAddress"
+            android:enabled="false"
+            android:textColor="@color/text_secondary"
+            android:layout_marginBottom="16dp" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnGovernmentId"
+            style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/apply_upload_government_id"
+            android:layout_marginBottom="8dp" />
+
+        <ImageView
+            android:id="@+id/imageGovernmentId"
+            android:layout_width="match_parent"
+            android:layout_height="140dp"
+            android:scaleType="centerCrop"
+            android:visibility="gone"
+            android:layout_marginBottom="12dp"
+            android:contentDescription="@string/apply_upload_government_id" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnBarangayCertification"
+            style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/apply_upload_barangay_certification"
+            android:layout_marginBottom="8dp" />
+
+        <ImageView
+            android:id="@+id/imageBarangayCertification"
+            android:layout_width="match_parent"
+            android:layout_height="140dp"
+            android:scaleType="centerCrop"
+            android:visibility="gone"
+            android:layout_marginBottom="12dp"
+            android:contentDescription="@string/apply_upload_barangay_certification" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnSelfie"
+            style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/apply_take_selfie"
+            android:layout_marginBottom="8dp" />
+
+        <ImageView
+            android:id="@+id/imageSelfie"
+            android:layout_width="match_parent"
+            android:layout_height="140dp"
+            android:scaleType="centerCrop"
+            android:visibility="gone"
+            android:layout_marginBottom="16dp"
+            android:contentDescription="@string/apply_take_selfie" />
+
+        <EditText
+            android:id="@+id/editEmergencyContact"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="@string/apply_emergency_contact_hint"
+            android:textColor="@color/text_primary"
+            android:layout_marginBottom="12dp" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/apply_blood_type_label"
+            android:textColor="@color/text_primary"
+            android:textStyle="bold"
+            android:layout_marginBottom="4dp" />
+
+        <Spinner
+            android:id="@+id/spinnerBloodType"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="12dp" />
+
+        <EditText
+            android:id="@+id/editOccupation"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="@string/apply_occupation_hint"
+            android:textColor="@color/text_primary"
+            android:layout_marginBottom="12dp" />
+
+        <EditText
+            android:id="@+id/editReason"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="@string/apply_reason_hint"
+            android:inputType="textMultiLine|textCapSentences"
+            android:minLines="3"
+            android:textColor="@color/text_primary"
+            android:layout_marginBottom="12dp" />
+
+        <TextView
+            android:id="@+id/textError"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textColor="@color/fire_red"
+            android:visibility="gone"
+            android:layout_marginBottom="12dp" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnSubmitApplication"
+            android:layout_width="match_parent"
+            android:layout_height="56dp"
+            app:cornerRadius="16dp"
+            android:text="@string/apply_submit_button" />
+
+    </LinearLayout>
+</ScrollView>

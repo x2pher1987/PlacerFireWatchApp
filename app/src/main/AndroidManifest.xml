@@ -59,6 +59,11 @@
             android:label="@string/settings_title" />
 
         <activity
+            android:name=".responder.apply.ResponderApplicationActivity"
+            android:exported="false"
+            android:label="@string/apply_title" />
+
+        <activity
             android:name=".responder.ResponderDashboardActivity"
             android:exported="false"
             android:label="@string/responder_dashboard_title" />

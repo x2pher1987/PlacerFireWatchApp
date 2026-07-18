@@ -1,12 +1,13 @@
 rules_version = '2';
 
 // Every account has a users/{uid} doc holding its role. Anyone can
-// self-register (role forced to "citizen" at creation); becoming a
-// responder or admin means an out-of-band edit to that same doc by the
-// project admin via the Firebase console — see the README's "Create
-// responder accounts" section. Fire report writes require the signed-in
-// UID to match the report's userId; reads/status-updates require an
-// *approved* responder (or, later, an admin).
+// self-register (role forced to "citizen" at creation). Becoming a
+// responder or admin normally happens through the in-app application +
+// admin-approval flow (responder_applications/{uid} below); admins can
+// also promote/suspend accounts directly by editing users/{uid} in the
+// Firebase console. Fire report writes require the signed-in UID to
+// match the report's userId; reads/status-updates require an *approved*
+// responder or an admin.
 service cloud.firestore {
   match /databases/{database}/documents {
 
@@ -21,14 +22,40 @@ service cloud.firestore {
         && currentUserDoc().responderStatus == 'approved';
     }
 
+    function isAdmin() {
+      return request.auth != null
+        && exists(/databases/$(database)/documents/users/$(request.auth.uid))
+        && currentUserDoc().role == 'admin';
+    }
+
     match /users/{uid} {
-      allow read: if request.auth != null && request.auth.uid == uid;
+      allow read: if request.auth != null && (request.auth.uid == uid || isAdmin());
       allow create: if request.auth != null && request.auth.uid == uid
         && request.resource.data.role == 'citizen'
         && request.resource.data.keys().hasOnly(
              ['fullName', 'email', 'role', 'responderStatus', 'suspended', 'createdAt']
            );
-      allow update: if false;
+      // Only an admin can change role/responderStatus/suspended, and only
+      // those three fields — never fullName/email, and never self-granted.
+      allow update: if isAdmin()
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(
+             ['role', 'responderStatus', 'suspended']
+           );
+      allow delete: if false;
+    }
+
+    // One application per account, keyed by the applicant's own UID.
+    // Applicants can create/update their own application while it's still
+    // pending (e.g. to fix a mistake before an admin reviews it); once an
+    // admin approves/rejects, only the status field itself can move, and
+    // only an admin can move it.
+    match /responder_applications/{uid} {
+      allow read: if request.auth != null && (request.auth.uid == uid || isAdmin());
+      allow create: if request.auth != null && request.auth.uid == uid
+        && request.resource.data.status == 'pending';
+      allow update: if (request.auth != null && request.auth.uid == uid
+             && resource.data.status == 'pending' && request.resource.data.status == 'pending')
+          || (isAdmin() && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status']));
       allow delete: if false;
     }
 
@@ -39,8 +66,8 @@ service cloud.firestore {
         && request.resource.data.keys().hasOnly(
              ['latitude', 'longitude', 'timestamp', 'userId', 'photoUrl', 'note', 'status', 'barangay']
            );
-      allow read: if isApprovedResponder();
-      allow update: if isApprovedResponder()
+      allow read: if isApprovedResponder() || isAdmin();
+      allow update: if (isApprovedResponder() || isAdmin())
         && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status'])
         && request.resource.data.status in
              ['Accepted', 'Responding', 'Arrived', 'Fire Out', 'False Alarm'];

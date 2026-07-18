@@ -77,6 +77,15 @@
             android:text="@string/settings_title"
             android:textColor="@color/text_secondary" />
 
+        <TextView
+            android:id="@+id/linkApplyResponder"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:padding="8dp"
+            android:text="@string/apply_link"
+            android:textColor="@color/text_secondary" />
+
     </LinearLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

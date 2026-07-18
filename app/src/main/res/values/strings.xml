@@ -44,9 +44,38 @@
     <string name="auth_sign_in_failed">Sign in failed. Check your email and password.</string>
     <string name="auth_create_account_failed">Could not create account. Try again.</string>
 
-    <!-- Admin (placeholder — Section 4) -->
+    <!-- Admin -->
     <string name="admin_home_title">Admin</string>
-    <string name="admin_placeholder_message">Full admin tools (approvals, reports, analytics, barangay management) are coming soon.</string>
+    <string name="admin_placeholder_message">Full admin tools (reports, analytics, barangay management) are coming soon.</string>
+    <string name="admin_pending_applications_title">Pending Responder Applications</string>
+    <string name="admin_no_pending_applications">No pending applications.</string>
+    <string name="admin_applications_load_failed">Could not load applications: %1$s</string>
+    <string name="admin_approve">Approve</string>
+    <string name="admin_reject">Reject</string>
+    <string name="admin_action_failed">Could not update this application. Try again.</string>
+    <string name="admin_view_document">View</string>
+
+    <!-- Responder registration (Section 3) -->
+    <string name="apply_link">Apply to Become a Responder</string>
+    <string name="apply_title">Responder Application</string>
+    <string name="apply_intro">Fill this out to apply as a BFP volunteer responder. An admin reviews every application — you\'ll keep citizen access in the meantime.</string>
+    <string name="apply_full_name_hint">Full Name</string>
+    <string name="apply_birthdate_hint">Birthdate (tap to select)</string>
+    <string name="apply_address_hint">Complete Address</string>
+    <string name="apply_barangay_label">Barangay</string>
+    <string name="apply_contact_number_hint">Contact Number</string>
+    <string name="apply_upload_government_id">Upload Government-issued ID</string>
+    <string name="apply_upload_barangay_certification">Upload Barangay Certification</string>
+    <string name="apply_take_selfie">Take Selfie</string>
+    <string name="apply_emergency_contact_hint">Emergency Contact (name and number)</string>
+    <string name="apply_blood_type_label">Blood Type (optional)</string>
+    <string name="apply_occupation_hint">Occupation</string>
+    <string name="apply_reason_hint">Reason for joining</string>
+    <string name="apply_submit_button">Submit Application</string>
+    <string name="apply_missing_documents">Please attach your ID, barangay certification, and a selfie.</string>
+    <string name="apply_submitting">Submitting your application…</string>
+    <string name="apply_submitted_success">Application submitted. An admin will review it soon.</string>
+    <string name="apply_submitted_failure">Could not submit your application. Check your connection and try again.</string>
 
     <!-- Responder dashboard -->
     <string name="responder_dashboard_title">Incidents</string>

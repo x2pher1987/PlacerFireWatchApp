@@ -25,6 +25,7 @@ import com.placer.firewatch.detection.AlertTrigger
 import com.placer.firewatch.location.LocationProvider
 import com.placer.firewatch.report.FireReportDraft
 import com.placer.firewatch.report.FireReportRepository
+import com.placer.firewatch.responder.apply.ResponderApplicationActivity
 import com.placer.firewatch.util.Prefs
 import java.io.File
 import kotlinx.coroutines.launch
@@ -106,6 +107,9 @@ class MainActivity : AppCompatActivity() {
         binding.btnToggleMonitoring.setOnClickListener { toggleMonitoring() }
         binding.btnReportFire.setOnClickListener { sendManualReport() }
         binding.btnCallBfp.setOnClickListener { callBfp() }
+        binding.linkApplyResponder.setOnClickListener {
+            startActivity(Intent(this, ResponderApplicationActivity::class.java))
+        }
         binding.btnSettings.setOnClickListener {
             startActivity(Intent(this, SettingsActivity::class.java))
         }
