@@ -76,6 +76,14 @@
             android:text="@string/call_bfp"
             android:layout_marginBottom="8dp" />
 
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnFacebookLive"
+            style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/facebook_live_button"
+            android:layout_marginBottom="8dp" />
+
         <TextView
             android:id="@+id/btnSettings"
             android:layout_width="match_parent"

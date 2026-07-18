@@ -10,6 +10,18 @@
     <string name="notification_monitoring_text">Watching for smoke/fire near %1$s</string>
     <string name="permissions_required">Camera, location, and SMS permissions are required for this app to work.</string>
 
+    <!-- Facebook Live (Section 9) -->
+    <string name="facebook_live_button">📹 Go Live on Facebook</string>
+    <string name="facebook_not_installed">Facebook must be installed to go live.</string>
+
+    <!-- About (Section 13) -->
+    <string name="about_link">About</string>
+    <string name="about_mission">This is a free application dedicated to my beloved Municipality of Placer, Masbate.</string>
+    <string name="about_developer_label">Developer</string>
+    <string name="about_developer_name">CHRIS CUACA</string>
+    <string name="about_verse_text">"By the blessing of the upright the city is exalted: but it is overthrown by the mouth of the wicked."</string>
+    <string name="about_verse_reference">Proverbs 11:11 (KJV)</string>
+
     <!-- Report types (Section 6) -->
     <string name="report_fire_now_button">🔥 Report Fire Now</string>
     <string name="report_smoke_button">🌫 Report Smoke</string>

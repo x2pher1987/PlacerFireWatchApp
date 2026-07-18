@@ -20,6 +20,7 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.firebase.auth.FirebaseAuth
 import com.placer.firewatch.databinding.ActivityMainBinding
 import com.placer.firewatch.databinding.DialogReportFireBinding
+import com.placer.firewatch.facebook.FacebookLive
 import com.placer.firewatch.location.LocationProvider
 import com.placer.firewatch.report.FireReportDraft
 import com.placer.firewatch.report.FireReportRepository
@@ -111,6 +112,7 @@ class MainActivity : AppCompatActivity() {
         binding.btnReportSuspectedFire.setOnClickListener { onReportTapped(ReportType.SUSPECTED_FIRE) }
         binding.btnToggleMonitoring.setOnClickListener { toggleMonitoring() }
         binding.btnCallBfp.setOnClickListener { callBfp() }
+        binding.btnFacebookLive.setOnClickListener { FacebookLive.launch(this) }
         binding.linkApplyResponder.setOnClickListener {
             startActivity(Intent(this, ResponderApplicationActivity::class.java))
         }

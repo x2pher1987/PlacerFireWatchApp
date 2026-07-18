@@ -59,6 +59,11 @@
             android:label="@string/settings_title" />
 
         <activity
+            android:name=".AboutActivity"
+            android:exported="false"
+            android:label="@string/about_link" />
+
+        <activity
             android:name=".responder.apply.ResponderApplicationActivity"
             android:exported="false"
             android:label="@string/apply_title" />

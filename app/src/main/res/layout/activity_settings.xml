@@ -76,7 +76,17 @@
             style="@style/Widget.MaterialComponents.Button.OutlinedButton"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Send Test Alert (marked as TEST)" />
+            android:text="Send Test Alert (marked as TEST)"
+            android:layout_marginBottom="8dp" />
+
+        <TextView
+            android:id="@+id/linkAbout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:padding="8dp"
+            android:text="@string/about_link"
+            android:textColor="@color/text_secondary" />
 
     </LinearLayout>
 </ScrollView>

@@ -1,5 +1,6 @@
 package com.placer.firewatch
 
+import android.content.Intent
 import android.os.Bundle
 import android.widget.ArrayAdapter
 import androidx.appcompat.app.AppCompatActivity
@@ -32,6 +33,7 @@ class SettingsActivity : AppCompatActivity() {
 
         binding.btnSave.setOnClickListener { saveSettings() }
         binding.btnTestAlert.setOnClickListener { sendTestAlert() }
+        binding.linkAbout.setOnClickListener { startActivity(Intent(this, AboutActivity::class.java)) }
     }
 
     private fun selectedBarangay(): String = binding.spinnerBarangay.selectedItem.toString()
