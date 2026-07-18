@@ -88,5 +88,14 @@
             android:text="@string/about_link"
             android:textColor="@color/text_secondary" />
 
+        <TextView
+            android:id="@+id/linkLogout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:padding="8dp"
+            android:text="@string/responder_logout"
+            android:textColor="@color/fire_red" />
+
     </LinearLayout>
 </ScrollView>

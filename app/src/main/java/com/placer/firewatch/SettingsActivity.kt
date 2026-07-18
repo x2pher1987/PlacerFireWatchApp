@@ -5,6 +5,7 @@ import android.os.Bundle
 import android.widget.ArrayAdapter
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
+import com.google.firebase.auth.FirebaseAuth
 import com.placer.firewatch.alert.AlertSender
 import com.placer.firewatch.barangay.Barangays
 import com.placer.firewatch.databinding.ActivitySettingsBinding
@@ -34,6 +35,14 @@ class SettingsActivity : AppCompatActivity() {
         binding.btnSave.setOnClickListener { saveSettings() }
         binding.btnTestAlert.setOnClickListener { sendTestAlert() }
         binding.linkAbout.setOnClickListener { startActivity(Intent(this, AboutActivity::class.java)) }
+        binding.linkLogout.setOnClickListener { logOut() }
+    }
+
+    private fun logOut() {
+        FirebaseAuth.getInstance().signOut()
+        val intent = Intent(this, LandingActivity::class.java)
+            .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK)
+        startActivity(intent)
     }
 
     private fun selectedBarangay(): String = binding.spinnerBarangay.selectedItem.toString()

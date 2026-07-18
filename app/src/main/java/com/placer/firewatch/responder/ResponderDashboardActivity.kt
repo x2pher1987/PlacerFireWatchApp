@@ -57,8 +57,9 @@ class ResponderDashboardActivity : AppCompatActivity() {
 
         binding.btnLogout.setOnClickListener {
             if (isDevSession) DevResponderSession.end(this) else FirebaseAuth.getInstance().signOut()
-            startActivity(Intent(this, LandingActivity::class.java))
-            finish()
+            val intent = Intent(this, LandingActivity::class.java)
+                .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK)
+            startActivity(intent)
         }
 
         binding.chipGroupFilter.setOnCheckedStateChangeListener { _, checkedIds ->
